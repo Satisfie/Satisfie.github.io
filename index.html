@@ -313,6 +313,175 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/19/Caffe源码解读-im2col/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="John Doe">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.png">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Keson's blog">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Keson's blog" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/11/19/Caffe源码解读-im2col/" itemprop="url">
+                  Caffe源码解读--im2col
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-11-19T19:45:20+08:00">
+              2016-11-19
+            </time>
+
+            &nbsp;|&nbsp;
+
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-check-o"></i>
+            </span>
+            <time title="Post modified" itemprop="dateModified" datetime="2016-12-19T19:46:46+08:00">
+              2016-12-19
+            </time>
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/11/19/Caffe源码解读-im2col/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count fb-comments-count" data-href="http://yoursite.com/2016/11/19/Caffe源码解读-im2col/" itemprop="commentCount">0</span> comments
+                </a>
+              </span>
+            
+          
+
+          
+
+
+
+          
+          
+             <span id="/2016/11/19/Caffe源码解读-im2col/" class="leancloud_visitors" data-flag-title="Caffe源码解读--im2col">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Caffe源码解读之卷积篇–im2col"><a href="#Caffe源码解读之卷积篇–im2col" class="headerlink" title="Caffe源码解读之卷积篇–im2col"></a>Caffe源码解读之卷积篇–im2col</h1><p>卷积中比较重要的几个参数有</p>
+<ul>
+<li>深度,depth，即决定有多少个filters</li>
+<li>步长,stride,即卷积核的滑动间隔，默认为1</li>
+<li>补充，padding，即在图像两边补充数据</li>
+<li>膨胀，dilated, 在卷积的时候可以skip一定长度的像素</li>
+</ul>
+<p>通常情况下，卷积层后通常需要跟池化层，池化层统计区局部范围内的统计信息，然后再进一步的跟卷积层，这样可以扩大感受野的范围。但是这样会带来一个问题，池化层使得特征层的尺寸变得越来越小,针对层数很深的网络，最后卷积的特征量维度会很小。为了解决这个问题，有几种方法可以尝试：</p>
+<p>（1）反卷积，利用上采样扩大特征层的尺度，比如<a href="https://arxiv.org/pdf/1605.06211.pdf" target="_blank" rel="external">FCN</a><br><img src="http://oi8824myj.bkt.clouddn.com/fcn.png" alt="fcn"></p>
+<p>FCN网络是一个全卷积神经网络，直接在像素级别上端到端(end-to-end)地进行语义分割。为了解决下采样导致特征层尺度变小的问题，FCN采用双线性插值将响应张亮的长宽上采样到原图大小。</p>
+<p>（2）dilated convolution，膨胀卷积的方法，来自于这篇论文<a href="https://arxiv.org/abs/1511.07122" target="_blank" rel="external">Multi-Scale Context Aggregation by Dilated Convolutions</a></p>
+<p>由于池化层的存在，会使得特征层的尺寸越来越小，若去掉池化层，则感受野的范围就不能进行有效的扩大。在FCN中采用了上采样的方法来扩大特征层的尺寸，但是上采样不能将丢失的信息全部无损地找回来。</p>
+<p>dilated convolution是一个很好的解决方法，去掉了池化层，针对感受野的问题，采用了skip的方法，通过skip一定的像素来进行感受野的扩大。</p>
+<p>比如下图中，红色圆点对应的是卷积核中的数，绿色范围是感受野的大小。$3\times3$的卷积，图(a)中是默认的1-dilated卷积，感受野是$3\times3$；图(b)中采用2-dilated卷积，感受野为$7\times7$；图(c)中采用4-dilated，感受野是$15\times15$。</p>
+<p><img src="http://oi8824myj.bkt.clouddn.com/dilated.png" alt="dilated"></p>
+<h1 id="Caffe中的im2col"><a href="#Caffe中的im2col" class="headerlink" title="Caffe中的im2col"></a>Caffe中的im2col</h1><p>Reference:</p>
+<p><a href="https://github.com/Yangqing/caffe/wiki/Convolution-in-Caffe:-a-memo" target="_blank" rel="external">Convolution in Caffe: a memo</a></p>
+<p><a href="https://www.zhihu.com/question/28385679" target="_blank" rel="external">在Caffe中如何计算卷积知乎</a></p>
+<p>假设宽度为W，高度为H的图像，共有D个通道，则针对$K\times K$的卷积核，并考虑输出的filters个数为M。在Caffe中卷积操作的优化采用了一定的trick,将局部的patch转化成列向量来操作，对于$C\times H\times W$的图像，则对于1个filter,可以转化为$(H\times  W,K\times K\times D)$的矩阵来进行，然后用BLAS库中的<code>Gemm</code>函数来进行举证的乘法操作。</p>
+<p>针对1个$K\times K$的卷积核，C个通道的feature map局部patch的转化为列向量如下图所示：<br><img src="http://oi8824myj.bkt.clouddn.com/conv1.png" alt="im2col1"></p>
+<p>feature map平移后转化为列向量，如下：<br><img src="http://oi8824myj.bkt.clouddn.com/conv2.png" alt="im2col2"></p>
+<p>对于$C\times H \times W$的feature map,得到的矩阵为$(H\times W,C\times K \times K)$</p>
+<p><img src="http://oi8824myj.bkt.clouddn.com/conv3.png" alt="im2col3"></p>
+<p>针对$C<em>{out}$个filters，可以得到$(C</em>{out},C\times K\times K)$的矩阵，然后与转置后的feature map相乘得到$(C_{out},H\times W)$的矩阵。<br><img src="http://oi8824myj.bkt.clouddn.com/conv4.jpg" alt="im2col4"></p>
+<h1 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h1><p>计算输出的feature map的尺寸，针对的而是2D的卷积，n维的卷积与之类似。</p>
+<ul>
+<li>输出的高度: output_h = (height + 2 <em> pad_h -(dilation_h </em> (kernel_h - 1) + 1)) / stride_h + 1</li>
+<li>输出的宽度: output_w = (width  + 2 <em> pad_w -(dilation_w </em> (kernel_w - 1)+ 1)) / stride_w + 1</li>
+<li>一个通道的size: channel_size=height*width</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Dtype&gt;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">im2col_cpu</span><span class="params">(<span class="keyword">const</span> Dtype* data_im, <span class="keyword">const</span> <span class="keyword">int</span> channels,</span></span></div><div class="line">    <span class="keyword">const</span> <span class="keyword">int</span> height, <span class="keyword">const</span> <span class="keyword">int</span> width, <span class="keyword">const</span> <span class="keyword">int</span> kernel_h, <span class="keyword">const</span> <span class="keyword">int</span> kernel_w,</div><div class="line">    <span class="keyword">const</span> <span class="keyword">int</span> pad_h, <span class="keyword">const</span> <span class="keyword">int</span> pad_w,</div><div class="line">    <span class="keyword">const</span> <span class="keyword">int</span> stride_h, <span class="keyword">const</span> <span class="keyword">int</span> stride_w,</div><div class="line">    <span class="keyword">const</span> <span class="keyword">int</span> dilation_h, <span class="keyword">const</span> <span class="keyword">int</span> dilation_w,</div><div class="line">    Dtype* data_col) &#123;</div><div class="line">  <span class="keyword">const</span> <span class="keyword">int</span> output_h = (height + <span class="number">2</span> * pad_h -</div><div class="line">    (dilation_h * (kernel_h - <span class="number">1</span>) + <span class="number">1</span>)) / stride_h + <span class="number">1</span>;</div><div class="line">  <span class="keyword">const</span> <span class="keyword">int</span> output_w = (width + <span class="number">2</span> * pad_w -</div><div class="line">    (dilation_w * (kernel_w - <span class="number">1</span>) + <span class="number">1</span>)) / stride_w + <span class="number">1</span>;</div><div class="line">  <span class="keyword">const</span> <span class="keyword">int</span> channel_size = height * width;</div><div class="line">  </div><div class="line">  <span class="comment">//安装CHW的顺序进行</span></div><div class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> channel = channels; channel--; data_im += channel_size) &#123;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> kernel_row = <span class="number">0</span>; kernel_row &lt; kernel_h; kernel_row++) &#123;</div><div class="line">      <span class="keyword">for</span> (<span class="keyword">int</span> kernel_col = <span class="number">0</span>; kernel_col &lt; kernel_w; kernel_col++) &#123;</div><div class="line">        <span class="keyword">int</span> input_row = -pad_h + kernel_row * dilation_h;</div><div class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> output_rows = output_h; output_rows; output_rows--) &#123;</div><div class="line">          <span class="keyword">if</span> (!is_a_ge_zero_and_a_lt_b(input_row, height)) &#123;</div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> output_cols = output_w; output_cols; output_cols--) &#123;</div><div class="line">              *(data_col++) = <span class="number">0</span>;</div><div class="line">            &#125;</div><div class="line">          &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">int</span> input_col = -pad_w + kernel_col * dilation_w;</div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> output_col = output_w; output_col; output_col--) &#123;</div><div class="line">              <span class="keyword">if</span> (is_a_ge_zero_and_a_lt_b(input_col, width)) &#123;</div><div class="line">                <span class="comment">//相应的数据copy到data_col指针</span></div><div class="line">                *(data_col++) = data_im[input_row * width + input_col];</div><div class="line">              &#125; <span class="keyword">else</span> &#123;</div><div class="line">                *(data_col++) = <span class="number">0</span>;</div><div class="line">              &#125;</div><div class="line">              <span class="comment">//宽度上的stride</span></div><div class="line">              input_col += stride_w;</div><div class="line">            &#125;</div><div class="line">          &#125;</div><div class="line">          <span class="comment">//高度上stride</span></div><div class="line">          input_row += stride_h;</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
   <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/20/Caffe源码解读2-Blob/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1218,7 +1387,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-count">5</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
