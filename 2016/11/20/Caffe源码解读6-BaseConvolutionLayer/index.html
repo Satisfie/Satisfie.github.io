@@ -1,0 +1,887 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="learn, think" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="Message ConvolutionParameter分析caffe中的每个层，应该先看caffe.proto中关于该层的参数定义，message ConvolutionParameter的定义如下：
+12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152mes">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Caffe源码解读6--BaseConvolutionLayer">
+<meta property="og:url" content="http://yoursite.com/2016/11/20/Caffe源码解读6-BaseConvolutionLayer/index.html">
+<meta property="og:site_name" content="Keson's blog">
+<meta property="og:description" content="Message ConvolutionParameter分析caffe中的每个层，应该先看caffe.proto中关于该层的参数定义，message ConvolutionParameter的定义如下：
+12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152mes">
+<meta property="og:updated_time" content="2016-12-20T06:28:35.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Caffe源码解读6--BaseConvolutionLayer">
+<meta name="twitter:description" content="Message ConvolutionParameter分析caffe中的每个层，应该先看caffe.proto中关于该层的参数定义，message ConvolutionParameter的定义如下：
+12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152mes">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/11/20/Caffe源码解读6-BaseConvolutionLayer/"/>
+
+
+
+
+
+  <title> Caffe源码解读6--BaseConvolutionLayer | Keson's blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+<script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '',
+      xfbml      : true,
+      version    : 'v2.6'
+    });
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/zh_Hans/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+</script>
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Keson's blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/20/Caffe源码解读6-BaseConvolutionLayer/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="John Doe">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.png">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Keson's blog">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Keson's blog" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Caffe源码解读6--BaseConvolutionLayer
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-11-20T14:27:12+08:00">
+              2016-11-20
+            </time>
+
+            &nbsp;|&nbsp;
+
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-check-o"></i>
+            </span>
+            <time title="Post modified" itemprop="dateModified" datetime="2016-12-20T14:28:35+08:00">
+              2016-12-20
+            </time>
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/11/20/Caffe源码解读6-BaseConvolutionLayer/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count fb-comments-count" data-href="http://yoursite.com/2016/11/20/Caffe源码解读6-BaseConvolutionLayer/" itemprop="commentCount">0</span> comments
+                </a>
+              </span>
+            
+          
+
+          
+
+
+
+          
+          
+             <span id="/2016/11/20/Caffe源码解读6-BaseConvolutionLayer/" class="leancloud_visitors" data-flag-title="Caffe源码解读6--BaseConvolutionLayer">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv"><i class="fa fa-file-o"></i>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+              </span>
+          
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Message-ConvolutionParameter"><a href="#Message-ConvolutionParameter" class="headerlink" title="Message ConvolutionParameter"></a>Message ConvolutionParameter</h1><p>分析caffe中的每个层，应该先看caffe.proto中关于该层的参数定义，<code>message ConvolutionParameter</code>的定义如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line">message ConvolutionParameter &#123;</div><div class="line">  optional uint32 num_output = <span class="number">1</span>; <span class="comment">// The number of outputs for the layer</span></div><div class="line">  optional <span class="keyword">bool</span> bias_term = <span class="number">2</span> [<span class="keyword">default</span> = <span class="literal">true</span>]; <span class="comment">// whether to have bias terms</span></div><div class="line"></div><div class="line">  <span class="comment">// Pad, kernel size, and stride are all given as a single value for equal</span></div><div class="line">  <span class="comment">// dimensions in all spatial dimensions, or once per spatial dimension.</span></div><div class="line">  repeated uint32 pad = <span class="number">3</span>; <span class="comment">// The padding size; defaults to 0</span></div><div class="line">  repeated uint32 kernel_size = <span class="number">4</span>; <span class="comment">// The kernel size</span></div><div class="line">  repeated uint32 stride = <span class="number">6</span>; <span class="comment">// The stride; defaults to 1</span></div><div class="line">  <span class="comment">// Factor used to dilate the kernel, (implicitly) zero-filling the resulting</span></div><div class="line">  <span class="comment">// holes. (Kernel dilation is sometimes referred to by its use in the</span></div><div class="line">  <span class="comment">// algorithme à trous from Holschneider et al. 1987.)</span></div><div class="line">  repeated uint32 dilation = <span class="number">18</span>; <span class="comment">// The dilation; defaults to 1</span></div><div class="line"></div><div class="line">  <span class="comment">// For 2D convolution only, the *_h and *_w versions may also be used to</span></div><div class="line">  <span class="comment">// specify both spatial dimensions.</span></div><div class="line">  optional uint32 pad_h = <span class="number">9</span> [<span class="keyword">default</span> = <span class="number">0</span>]; <span class="comment">// The padding height (2D only)</span></div><div class="line">  optional uint32 pad_w = <span class="number">10</span> [<span class="keyword">default</span> = <span class="number">0</span>]; <span class="comment">// The padding width (2D only)</span></div><div class="line">  optional uint32 kernel_h = <span class="number">11</span>; <span class="comment">// The kernel height (2D only)</span></div><div class="line">  optional uint32 kernel_w = <span class="number">12</span>; <span class="comment">// The kernel width (2D only)</span></div><div class="line">  optional uint32 stride_h = <span class="number">13</span>; <span class="comment">// The stride height (2D only)</span></div><div class="line">  optional uint32 stride_w = <span class="number">14</span>; <span class="comment">// The stride width (2D only)</span></div><div class="line"></div><div class="line">  optional uint32 group = <span class="number">5</span> [<span class="keyword">default</span> = <span class="number">1</span>]; <span class="comment">// The group size for group conv</span></div><div class="line"></div><div class="line">  optional FillerParameter weight_filler = <span class="number">7</span>; <span class="comment">// The filler for the weight</span></div><div class="line">  optional FillerParameter bias_filler = <span class="number">8</span>; <span class="comment">// The filler for the bias</span></div><div class="line">  <span class="keyword">enum</span> Engine &#123;</div><div class="line">    DEFAULT = <span class="number">0</span>;</div><div class="line">    CAFFE = <span class="number">1</span>;</div><div class="line">    CUDNN = <span class="number">2</span>;</div><div class="line">  &#125;</div><div class="line">  optional Engine engine = <span class="number">15</span> [<span class="keyword">default</span> = DEFAULT];</div><div class="line"></div><div class="line">  <span class="comment">// The axis to interpret as "channels" when performing convolution.</span></div><div class="line">  <span class="comment">// Preceding dimensions are treated as independent inputs;</span></div><div class="line">  <span class="comment">// succeeding dimensions are treated as "spatial".</span></div><div class="line">  <span class="comment">// With (N, C, H, W) inputs, and axis == 1 (the default), we perform</span></div><div class="line">  <span class="comment">// N independent 2D convolutions, sliding C-channel (or (C/g)-channels, for</span></div><div class="line">  <span class="comment">// groups g&gt;1) filters across the spatial axes (H, W) of the input.</span></div><div class="line">  <span class="comment">// With (N, C, D, H, W) inputs, and axis == 1, we perform</span></div><div class="line">  <span class="comment">// N independent 3D convolutions, sliding (C/g)-channels</span></div><div class="line">  <span class="comment">// filters across the spatial axes (D, H, W) of the input.</span></div><div class="line">  optional int32 axis = <span class="number">16</span> [<span class="keyword">default</span> = <span class="number">1</span>];</div><div class="line"></div><div class="line">  <span class="comment">// Whether to force use of the general ND convolution, even if a specific</span></div><div class="line">  <span class="comment">// implementation for blobs of the appropriate number of spatial dimensions</span></div><div class="line">  <span class="comment">// is available. (Currently, there is only a 2D-specific convolution</span></div><div class="line">  <span class="comment">// implementation; for input blobs with num_axes != 2, this option is</span></div><div class="line">  <span class="comment">// ignored and the ND implementation will be used.)</span></div><div class="line">  optional <span class="keyword">bool</span> force_nd_im2col = <span class="number">17</span> [<span class="keyword">default</span> = <span class="literal">false</span>];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h1 id="Message生成的ConvolutionParameter类"><a href="#Message生成的ConvolutionParameter类" class="headerlink" title="Message生成的ConvolutionParameter类"></a>Message生成的ConvolutionParameter类</h1><h2 id="对于Message中的optional字段"><a href="#对于Message中的optional字段" class="headerlink" title="对于Message中的optional字段"></a>对于Message中的<code>optional</code>字段</h2><p>例如对于<code>optional uint32 num_output = 1</code>会生成以下对应的accessors</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// optional uint32 num_output = 1;</span></div><div class="line"><span class="function"><span class="keyword">bool</span> <span class="title">has_num_output</span><span class="params">()</span> <span class="keyword">const</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">clear_num_output</span><span class="params">()</span></span>;</div><div class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">int</span> kNumOutputFieldNumber = <span class="number">1</span>;</div><div class="line">::google::protobuf::<span class="function">uint32 <span class="title">num_output</span><span class="params">()</span> <span class="keyword">const</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">set_num_output</span><span class="params">(::google::protobuf::uint32 value)</span></span>;</div></pre></td></tr></table></figure>
+<p>同时会产生如下私有函数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">set_has_num_output</span><span class="params">()</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">clear_has_num_output</span><span class="params">()</span></span>;</div></pre></td></tr></table></figure>
+<h2 id="对于Message中的repeated字段"><a href="#对于Message中的repeated字段" class="headerlink" title="对于Message中的repeated字段"></a>对于Message中的<code>repeated</code>字段</h2><p>会产生如下的accessors</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// repeated uint32 pad = 3;</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">pad_size</span><span class="params">()</span> <span class="keyword">const</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">clear_pad</span><span class="params">()</span></span>;</div><div class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">int</span> kPadFieldNumber = <span class="number">3</span>;</div><div class="line">::google::protobuf::<span class="function">uint32 <span class="title">pad</span><span class="params">(<span class="keyword">int</span> index)</span> <span class="keyword">const</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">set_pad</span><span class="params">(<span class="keyword">int</span> index, ::google::protobuf::uint32 value)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">add_pad</span><span class="params">(::google::protobuf::uint32 value)</span></span>;</div><div class="line"><span class="keyword">const</span> ::google::protobuf::RepeatedField&lt; ::google::protobuf::uint32 &gt;&amp;</div><div class="line">    pad() <span class="keyword">const</span>;</div><div class="line">::google::protobuf::RepeatedField&lt; ::google::protobuf::uint32 &gt;*</div><div class="line">    mutable_pad();</div></pre></td></tr></table></figure>
+<h1 id="BaseConvolutionLayer类"><a href="#BaseConvolutionLayer类" class="headerlink" title="BaseConvolutionLayer类"></a><code>BaseConvolutionLayer</code>类</h1><p>该类继承<code>Layer</code>,也是<code>ConvolutionLayer</code>和<code>DeconvolutionLayer</code>的抽象类。</p>
+<h2 id="protected成员变量和private变量"><a href="#protected成员变量和private变量" class="headerlink" title="protected成员变量和private变量"></a><code>protected</code>成员变量和<code>private</code>变量</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">protected</span>:</div><div class="line"> <span class="comment">/// @brief The spatial dimensions of a filter kernel.</span></div><div class="line"> Blob&lt;<span class="keyword">int</span>&gt; kernel_shape_;  <span class="comment">//卷积核形状</span></div><div class="line"> <span class="comment">/// @brief The spatial dimensions of the stride.</span></div><div class="line"> Blob&lt;<span class="keyword">int</span>&gt; stride_;        <span class="comment">//步进</span></div><div class="line"> <span class="comment">/// @brief The spatial dimensions of the padding.</span></div><div class="line"> Blob&lt;<span class="keyword">int</span>&gt; pad_;           <span class="comment">//补充</span></div><div class="line"> <span class="comment">/// @brief The spatial dimensions of the dilation.</span></div><div class="line"> Blob&lt;<span class="keyword">int</span>&gt; dilation_;      <span class="comment">//膨胀系数</span></div><div class="line"> <span class="comment">/// @brief The spatial dimensions of the convolution input.</span></div><div class="line"> Blob&lt;<span class="keyword">int</span>&gt; conv_input_shape_; <span class="comment">//卷积的输入形状</span></div><div class="line"> <span class="comment">/// @brief The spatial dimensions of the col_buffer.</span></div><div class="line"> <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; col_buffer_shape_; <span class="comment">//</span></div><div class="line"> <span class="comment">/// @brief The spatial dimensions of the output.</span></div><div class="line"> <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; output_shape_;     <span class="comment">//输出的形状</span></div><div class="line"> <span class="keyword">const</span> <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;* bottom_shape_; <span class="comment">//</span></div><div class="line"></div><div class="line"> <span class="keyword">int</span> num_spatial_axes_;  <span class="comment">//空间的轴个数</span></div><div class="line"> <span class="keyword">int</span> bottom_dim_;        <span class="comment">//输入维度</span></div><div class="line"> <span class="keyword">int</span> top_dim_;           <span class="comment">//输出维度</span></div><div class="line"></div><div class="line"> <span class="keyword">int</span> channel_axis_;      <span class="comment">//通道轴的索引</span></div><div class="line"> <span class="keyword">int</span> num_;               <span class="comment">//</span></div><div class="line"> <span class="keyword">int</span> channels_;          <span class="comment">//输入的通道数</span></div><div class="line"> <span class="keyword">int</span> group_;             <span class="comment">//卷积组的大小</span></div><div class="line"> <span class="keyword">int</span> out_spatial_dim_;   <span class="comment">//输出的空间维度</span></div><div class="line"> <span class="keyword">int</span> weight_offset_;     <span class="comment">//使用卷积组时用到的</span></div><div class="line"> <span class="keyword">int</span> num_output_;        <span class="comment">//卷积后的通道数</span></div><div class="line"> <span class="keyword">bool</span> bias_term_;        <span class="comment">//是否使用偏置</span></div><div class="line"> <span class="keyword">bool</span> is_1x1_;           <span class="comment">//是不是1*1的卷积</span></div><div class="line"> <span class="keyword">bool</span> force_nd_im2col_;  <span class="comment">//强制使用n维通用卷积</span></div><div class="line"> </div><div class="line"> <span class="keyword">private</span>:</div><div class="line"> </div><div class="line"> <span class="keyword">int</span> num_kernels_im2col_; <span class="comment">//</span></div><div class="line"> <span class="keyword">int</span> num_kernels_col2im_;</div><div class="line"> <span class="keyword">int</span> conv_out_channels_;    <span class="comment">//卷积的输出通道数</span></div><div class="line"> <span class="keyword">int</span> conv_in_channels_;     <span class="comment">//卷积的输入通道数</span></div><div class="line"> <span class="keyword">int</span> conv_out_spatial_dim_; <span class="comment">//卷积的输出空间维度=卷积后的h*w</span></div><div class="line"> <span class="keyword">int</span> kernel_dim_;           <span class="comment">//</span></div><div class="line"> <span class="keyword">int</span> col_offset_;           <span class="comment">//</span></div><div class="line"> <span class="keyword">int</span> output_offset_;</div><div class="line"></div><div class="line"> Blob&lt;Dtype&gt; col_buffer_;   <span class="comment">//使用im2col时使用的存储空间</span></div><div class="line"> Blob&lt;Dtype&gt; bias_multiplier_;</div></pre></td></tr></table></figure>
+<h2 id="LayerSetUp"><a href="#LayerSetUp" class="headerlink" title="LayerSetUp"></a><code>LayerSetUp</code></h2><p>在<code>LayerSetUp</code>中，首先是对kernel size，padding,stride和输入的配置</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Dtype&gt;</div><div class="line"><span class="keyword">void</span> BaseConvolutionLayer&lt;Dtype&gt;::LayerSetUp(<span class="keyword">const</span> <span class="built_in">vector</span>&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,</div><div class="line">      <span class="keyword">const</span> <span class="built_in">vector</span>&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) &#123;</div><div class="line">  <span class="comment">// Configure the kernel size, padding, stride, and inputs.</span></div><div class="line">  ConvolutionParameter conv_param = <span class="keyword">this</span>-&gt;layer_param_.convolution_param(); <span class="comment">//配置卷积参数</span></div><div class="line">  force_nd_im2col_ = conv_param.force_nd_im2col(); <span class="comment">//是否强制使用n维im2col</span></div><div class="line">  channel_axis_ = bottom[<span class="number">0</span>]-&gt;CanonicalAxisIndex(conv_param.axis());<span class="comment">//获取channel的axis</span></div><div class="line">  <span class="keyword">const</span> <span class="keyword">int</span> first_spatial_axis = channel_axis_ + <span class="number">1</span>;</div><div class="line">  <span class="keyword">const</span> <span class="keyword">int</span> num_axes = bottom[<span class="number">0</span>]-&gt;num_axes();     <span class="comment">//数据的axis数量</span></div><div class="line">  num_spatial_axes_ = num_axes - first_spatial_axis;</div><div class="line">  CHECK_GE(num_spatial_axes_, <span class="number">0</span>);</div><div class="line">  <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; bottom_dim_blob_shape(<span class="number">1</span>, num_spatial_axes_ + <span class="number">1</span>);</div><div class="line">  <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; spatial_dim_blob_shape(<span class="number">1</span>, <span class="built_in">std</span>::max(num_spatial_axes_, <span class="number">1</span>));</div><div class="line">  </div><div class="line">  <span class="comment">// Setup filter kernel dimensions (kernel_shape_). 开始卷积核的设置</span></div><div class="line">  kernel_shape_.Reshape(spatial_dim_blob_shape);</div><div class="line">  <span class="keyword">int</span>* kernel_shape_data = kernel_shape_.mutable_cpu_data();</div><div class="line">  <span class="keyword">if</span> (conv_param.has_kernel_h() || conv_param.has_kernel_w()) &#123;</div><div class="line">    CHECK_EQ(num_spatial_axes_, <span class="number">2</span>)</div><div class="line">        &lt;&lt; <span class="string">"kernel_h &amp; kernel_w can only be used for 2D convolution."</span>;</div><div class="line">    CHECK_EQ(<span class="number">0</span>, conv_param.kernel_size_size())</div><div class="line">        &lt;&lt; <span class="string">"Either kernel_size or kernel_h/w should be specified; not both."</span>;</div><div class="line">    kernel_shape_data[<span class="number">0</span>] = conv_param.kernel_h();  <span class="comment">//给kernel_shape_data 赋值高度</span></div><div class="line">    kernel_shape_data[<span class="number">1</span>] = conv_param.kernel_w();  <span class="comment">//给kernel_shape_data 赋值宽度</span></div><div class="line">  &#125; <span class="keyword">else</span> &#123;</div><div class="line">    <span class="keyword">const</span> <span class="keyword">int</span> num_kernel_dims = conv_param.kernel_size_size(); <span class="comment">//卷积核的数目</span></div><div class="line">    CHECK(num_kernel_dims == <span class="number">1</span> || num_kernel_dims == num_spatial_axes_)</div><div class="line">        &lt;&lt; <span class="string">"kernel_size must be specified once, or once per spatial dimension "</span></div><div class="line">        &lt;&lt; <span class="string">"(kernel_size specified "</span> &lt;&lt; num_kernel_dims &lt;&lt; <span class="string">" times; "</span></div><div class="line">        &lt;&lt; num_spatial_axes_ &lt;&lt; <span class="string">" spatial dims)."</span>;</div><div class="line">      <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; num_spatial_axes_; ++i) &#123;</div><div class="line">        kernel_shape_data[i] =</div><div class="line">            conv_param.kernel_size((num_kernel_dims == <span class="number">1</span>) ? <span class="number">0</span> : i);</div><div class="line">      &#125;</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; num_spatial_axes_; ++i) &#123;</div><div class="line">    CHECK_GT(kernel_shape_data[i], <span class="number">0</span>) &lt;&lt; <span class="string">"Filter dimensions must be nonzero."</span>;</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  <span class="comment">// Setup stride dimensions (stride_). 开始步进的设置</span></div><div class="line">  stride_.Reshape(spatial_dim_blob_shape);</div><div class="line">  <span class="keyword">int</span>* stride_data = stride_.mutable_cpu_data();</div><div class="line">  <span class="keyword">if</span> (conv_param.has_stride_h() || conv_param.has_stride_w()) &#123;</div><div class="line">    CHECK_EQ(num_spatial_axes_, <span class="number">2</span>)</div><div class="line">        &lt;&lt; <span class="string">"stride_h &amp; stride_w can only be used for 2D convolution."</span>;</div><div class="line">    CHECK_EQ(<span class="number">0</span>, conv_param.stride_size())</div><div class="line">        &lt;&lt; <span class="string">"Either stride or stride_h/w should be specified; not both."</span>;</div><div class="line">    stride_data[<span class="number">0</span>] = conv_param.stride_h(); <span class="comment">//给步进赋值</span></div><div class="line">    stride_data[<span class="number">1</span>] = conv_param.stride_w();</div><div class="line">  &#125; <span class="keyword">else</span> &#123;</div><div class="line">    <span class="keyword">const</span> <span class="keyword">int</span> num_stride_dims = conv_param.stride_size();</div><div class="line">    CHECK(num_stride_dims == <span class="number">0</span> || num_stride_dims == <span class="number">1</span> ||</div><div class="line">          num_stride_dims == num_spatial_axes_)</div><div class="line">        &lt;&lt; <span class="string">"stride must be specified once, or once per spatial dimension "</span></div><div class="line">        &lt;&lt; <span class="string">"(stride specified "</span> &lt;&lt; num_stride_dims &lt;&lt; <span class="string">" times; "</span></div><div class="line">        &lt;&lt; num_spatial_axes_ &lt;&lt; <span class="string">" spatial dims)."</span>;</div><div class="line">    <span class="keyword">const</span> <span class="keyword">int</span> kDefaultStride = <span class="number">1</span>;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; num_spatial_axes_; ++i) &#123;</div><div class="line">      stride_data[i] = (num_stride_dims == <span class="number">0</span>) ? kDefaultStride :</div><div class="line">          conv_param.stride((num_stride_dims == <span class="number">1</span>) ? <span class="number">0</span> : i);</div><div class="line">      CHECK_GT(stride_data[i], <span class="number">0</span>) &lt;&lt; <span class="string">"Stride dimensions must be nonzero."</span>;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  <span class="comment">// Setup pad dimensions (pad_).  开始padding的配置</span></div><div class="line">  pad_.Reshape(spatial_dim_blob_shape);</div><div class="line">  <span class="keyword">int</span>* pad_data = pad_.mutable_cpu_data();</div><div class="line">  <span class="keyword">if</span> (conv_param.has_pad_h() || conv_param.has_pad_w()) &#123;</div><div class="line">    CHECK_EQ(num_spatial_axes_, <span class="number">2</span>)</div><div class="line">        &lt;&lt; <span class="string">"pad_h &amp; pad_w can only be used for 2D convolution."</span>;</div><div class="line">    CHECK_EQ(<span class="number">0</span>, conv_param.pad_size())</div><div class="line">        &lt;&lt; <span class="string">"Either pad or pad_h/w should be specified; not both."</span>;</div><div class="line">    pad_data[<span class="number">0</span>] = conv_param.pad_h();</div><div class="line">    pad_data[<span class="number">1</span>] = conv_param.pad_w();</div><div class="line">  &#125; <span class="keyword">else</span> &#123;</div><div class="line">    <span class="keyword">const</span> <span class="keyword">int</span> num_pad_dims = conv_param.pad_size();</div><div class="line">    CHECK(num_pad_dims == <span class="number">0</span> || num_pad_dims == <span class="number">1</span> ||</div><div class="line">          num_pad_dims == num_spatial_axes_)</div><div class="line">        &lt;&lt; <span class="string">"pad must be specified once, or once per spatial dimension "</span></div><div class="line">        &lt;&lt; <span class="string">"(pad specified "</span> &lt;&lt; num_pad_dims &lt;&lt; <span class="string">" times; "</span></div><div class="line">        &lt;&lt; num_spatial_axes_ &lt;&lt; <span class="string">" spatial dims)."</span>;</div><div class="line">    <span class="keyword">const</span> <span class="keyword">int</span> kDefaultPad = <span class="number">0</span>;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; num_spatial_axes_; ++i) &#123;</div><div class="line">      pad_data[i] = (num_pad_dims == <span class="number">0</span>) ? kDefaultPad :</div><div class="line">          conv_param.pad((num_pad_dims == <span class="number">1</span>) ? <span class="number">0</span> : i);</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  <span class="comment">// Setup dilation dimensions (dilation_). 开始膨胀系数的配置</span></div><div class="line">  dilation_.Reshape(spatial_dim_blob_shape);</div><div class="line">  <span class="keyword">int</span>* dilation_data = dilation_.mutable_cpu_data();</div><div class="line">  <span class="keyword">const</span> <span class="keyword">int</span> num_dilation_dims = conv_param.dilation_size();</div><div class="line">  CHECK(num_dilation_dims == <span class="number">0</span> || num_dilation_dims == <span class="number">1</span> ||</div><div class="line">        num_dilation_dims == num_spatial_axes_)</div><div class="line">      &lt;&lt; <span class="string">"dilation must be specified once, or once per spatial dimension "</span></div><div class="line">      &lt;&lt; <span class="string">"(dilation specified "</span> &lt;&lt; num_dilation_dims &lt;&lt; <span class="string">" times; "</span></div><div class="line">      &lt;&lt; num_spatial_axes_ &lt;&lt; <span class="string">" spatial dims)."</span>;</div><div class="line">  <span class="keyword">const</span> <span class="keyword">int</span> kDefaultDilation = <span class="number">1</span>;</div><div class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; num_spatial_axes_; ++i) &#123;</div><div class="line">    dilation_data[i] = (num_dilation_dims == <span class="number">0</span>) ? kDefaultDilation :</div><div class="line">                       conv_param.dilation((num_dilation_dims == <span class="number">1</span>) ? <span class="number">0</span> : i);</div><div class="line">  &#125;</div><div class="line">  <span class="comment">// Special case: im2col is the identity for 1x1 convolution with stride 1</span></div><div class="line">  <span class="comment">// and no padding, so flag for skipping the buffer and transformation.</span></div><div class="line">  is_1x1_ = <span class="literal">true</span>;</div><div class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; num_spatial_axes_; ++i) &#123;</div><div class="line">    is_1x1_ &amp;=</div><div class="line">        kernel_shape_data[i] == <span class="number">1</span> &amp;&amp; stride_data[i] == <span class="number">1</span> &amp;&amp; pad_data[i] == <span class="number">0</span>;</div><div class="line">    <span class="keyword">if</span> (!is_1x1_) &#123; <span class="keyword">break</span>; &#125;</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  <span class="comment">// Configure output channels and groups. 开始配置输出的通道数和卷积组</span></div><div class="line">  channels_ = bottom[<span class="number">0</span>]-&gt;shape(channel_axis_);</div><div class="line">  num_output_ = <span class="keyword">this</span>-&gt;layer_param_.convolution_param().num_output();</div><div class="line">  CHECK_GT(num_output_, <span class="number">0</span>);</div><div class="line">  group_ = <span class="keyword">this</span>-&gt;layer_param_.convolution_param().group();</div><div class="line">  CHECK_EQ(channels_ % group_, <span class="number">0</span>);</div><div class="line">  CHECK_EQ(num_output_ % group_, <span class="number">0</span>)</div><div class="line">      &lt;&lt; <span class="string">"Number of output should be multiples of group."</span>;</div><div class="line">  <span class="keyword">if</span> (reverse_dimensions()) &#123;</div><div class="line">    conv_out_channels_ = channels_;</div><div class="line">    conv_in_channels_ = num_output_;</div><div class="line">  &#125; <span class="keyword">else</span> &#123;</div><div class="line">    conv_out_channels_ = num_output_;</div><div class="line">    conv_in_channels_ = channels_;</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  <span class="comment">// Handle the parameters: weights and biases. 开始处理权重参数</span></div><div class="line">  <span class="comment">// - blobs_[0] holds the filter weights       权重参数</span></div><div class="line">  <span class="comment">// - blobs_[1] holds the biases (optional)    偏置参数</span></div><div class="line">  <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; weight_shape(<span class="number">2</span>);</div><div class="line">  weight_shape[<span class="number">0</span>] = conv_out_channels_;          <span class="comment">//输出的通道数</span></div><div class="line">  weight_shape[<span class="number">1</span>] = conv_in_channels_ / group_;  <span class="comment">//输入的通道数，分组卷积，针对多GPU的问题</span></div><div class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; num_spatial_axes_; ++i) &#123;</div><div class="line">    weight_shape.push_back(kernel_shape_data[i]);</div><div class="line">  &#125;</div><div class="line">  bias_term_ = <span class="keyword">this</span>-&gt;layer_param_.convolution_param().bias_term();</div><div class="line">  <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; bias_shape(bias_term_, num_output_);</div><div class="line">  <span class="keyword">if</span> (<span class="keyword">this</span>-&gt;blobs_.size() &gt; <span class="number">0</span>) &#123;</div><div class="line">    CHECK_EQ(<span class="number">1</span> + bias_term_, <span class="keyword">this</span>-&gt;blobs_.size())</div><div class="line">        &lt;&lt; <span class="string">"Incorrect number of weight blobs."</span>;</div><div class="line">    <span class="keyword">if</span> (weight_shape != <span class="keyword">this</span>-&gt;blobs_[<span class="number">0</span>]-&gt;shape()) &#123;</div><div class="line">      Blob&lt;Dtype&gt; weight_shaped_blob(weight_shape);</div><div class="line">      LOG(FATAL) &lt;&lt; <span class="string">"Incorrect weight shape: expected shape "</span></div><div class="line">          &lt;&lt; weight_shaped_blob.shape_string() &lt;&lt; <span class="string">"; instead, shape was "</span></div><div class="line">          &lt;&lt; <span class="keyword">this</span>-&gt;blobs_[<span class="number">0</span>]-&gt;shape_string();</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (bias_term_ &amp;&amp; bias_shape != <span class="keyword">this</span>-&gt;blobs_[<span class="number">1</span>]-&gt;shape()) &#123;</div><div class="line">      Blob&lt;Dtype&gt; bias_shaped_blob(bias_shape);</div><div class="line">      LOG(FATAL) &lt;&lt; <span class="string">"Incorrect bias shape: expected shape "</span></div><div class="line">          &lt;&lt; bias_shaped_blob.shape_string() &lt;&lt; <span class="string">"; instead, shape was "</span></div><div class="line">          &lt;&lt; <span class="keyword">this</span>-&gt;blobs_[<span class="number">1</span>]-&gt;shape_string();</div><div class="line">    &#125;</div><div class="line">    LOG(INFO) &lt;&lt; <span class="string">"Skipping parameter initialization"</span>;</div><div class="line">  &#125; <span class="keyword">else</span> &#123;</div><div class="line">    <span class="keyword">if</span> (bias_term_) &#123;</div><div class="line">      <span class="keyword">this</span>-&gt;blobs_.resize(<span class="number">2</span>);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">      <span class="keyword">this</span>-&gt;blobs_.resize(<span class="number">1</span>);</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="comment">// Initialize and fill the weights:</span></div><div class="line">    <span class="comment">// output channels x input channels per-group x kernel height x kernel width</span></div><div class="line">    <span class="keyword">this</span>-&gt;blobs_[<span class="number">0</span>].reset(<span class="keyword">new</span> Blob&lt;Dtype&gt;(weight_shape));</div><div class="line">    <span class="built_in">shared_ptr</span>&lt;Filler&lt;Dtype&gt; &gt; weight_filler(GetFiller&lt;Dtype&gt;(</div><div class="line">        <span class="keyword">this</span>-&gt;layer_param_.convolution_param().weight_filler()));</div><div class="line">    weight_filler-&gt;Fill(<span class="keyword">this</span>-&gt;blobs_[<span class="number">0</span>].get());</div><div class="line">    <span class="comment">// If necessary, initialize and fill the biases.</span></div><div class="line">    <span class="keyword">if</span> (bias_term_) &#123;</div><div class="line">      <span class="keyword">this</span>-&gt;blobs_[<span class="number">1</span>].reset(<span class="keyword">new</span> Blob&lt;Dtype&gt;(bias_shape));</div><div class="line">      <span class="built_in">shared_ptr</span>&lt;Filler&lt;Dtype&gt; &gt; bias_filler(GetFiller&lt;Dtype&gt;(</div><div class="line">          <span class="keyword">this</span>-&gt;layer_param_.convolution_param().bias_filler()));</div><div class="line">      bias_filler-&gt;Fill(<span class="keyword">this</span>-&gt;blobs_[<span class="number">1</span>].get());</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  kernel_dim_ = <span class="keyword">this</span>-&gt;blobs_[<span class="number">0</span>]-&gt;count(<span class="number">1</span>); <span class="comment">//是3维度的乘积，输入图像的维度*卷积核的h*卷积核的w</span></div><div class="line">  weight_offset_ = conv_out_channels_ * kernel_dim_ / group_;</div><div class="line">  <span class="comment">// Propagate gradients to the parameters (as directed by backward pass).</span></div><div class="line">  <span class="keyword">this</span>-&gt;param_propagate_down_.resize(<span class="keyword">this</span>-&gt;blobs_.size(), <span class="literal">true</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="Reshape函数"><a href="#Reshape函数" class="headerlink" title="Reshape函数"></a><code>Reshape</code>函数</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Dtype&gt;</div><div class="line"><span class="keyword">void</span> BaseConvolutionLayer&lt;Dtype&gt;::Reshape(<span class="keyword">const</span> <span class="built_in">vector</span>&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,</div><div class="line">      <span class="keyword">const</span> <span class="built_in">vector</span>&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) &#123;</div><div class="line">  <span class="keyword">const</span> <span class="keyword">int</span> first_spatial_axis = channel_axis_ + <span class="number">1</span>;</div><div class="line">  CHECK_EQ(bottom[<span class="number">0</span>]-&gt;num_axes(), first_spatial_axis + num_spatial_axes_)</div><div class="line">      &lt;&lt; <span class="string">"bottom num_axes may not change."</span>;</div><div class="line">  num_ = bottom[<span class="number">0</span>]-&gt;count(<span class="number">0</span>, channel_axis_);</div><div class="line">  CHECK_EQ(bottom[<span class="number">0</span>]-&gt;shape(channel_axis_), channels_)</div><div class="line">      &lt;&lt; <span class="string">"Input size incompatible with convolution kernel."</span>;</div><div class="line">  <span class="comment">// <span class="doctag">TODO:</span> generalize to handle inputs of different shapes.</span></div><div class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> bottom_id = <span class="number">1</span>; bottom_id &lt; bottom.size(); ++bottom_id) &#123;</div><div class="line">    CHECK(bottom[<span class="number">0</span>]-&gt;shape() == bottom[bottom_id]-&gt;shape())</div><div class="line">        &lt;&lt; <span class="string">"All inputs must have the same shape."</span>;</div><div class="line">  &#125;</div><div class="line">  <span class="comment">// Shape the tops.</span></div><div class="line">  bottom_shape_ = &amp;bottom[<span class="number">0</span>]-&gt;shape();</div><div class="line">  compute_output_shape();</div><div class="line">  <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; top_shape(bottom[<span class="number">0</span>]-&gt;shape().begin(),</div><div class="line">      bottom[<span class="number">0</span>]-&gt;shape().begin() + channel_axis_);</div><div class="line">  top_shape.push_back(num_output_);</div><div class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; num_spatial_axes_; ++i) &#123;</div><div class="line">    top_shape.push_back(output_shape_[i]);</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> top_id = <span class="number">0</span>; top_id &lt; top.size(); ++top_id) &#123;</div><div class="line">    top[top_id]-&gt;Reshape(top_shape);</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">if</span> (reverse_dimensions()) &#123;</div><div class="line">    conv_out_spatial_dim_ = bottom[<span class="number">0</span>]-&gt;count(first_spatial_axis);</div><div class="line">  &#125; <span class="keyword">else</span> &#123;</div><div class="line">    conv_out_spatial_dim_ = top[<span class="number">0</span>]-&gt;count(first_spatial_axis);</div><div class="line">  &#125;</div><div class="line">  col_offset_ = kernel_dim_ * conv_out_spatial_dim_;</div><div class="line">  output_offset_ = conv_out_channels_ * conv_out_spatial_dim_ / group_;</div><div class="line">  <span class="comment">// Setup input dimensions (conv_input_shape_).</span></div><div class="line">  <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; bottom_dim_blob_shape(<span class="number">1</span>, num_spatial_axes_ + <span class="number">1</span>);</div><div class="line">  conv_input_shape_.Reshape(bottom_dim_blob_shape);</div><div class="line">  <span class="keyword">int</span>* conv_input_shape_data = conv_input_shape_.mutable_cpu_data();</div><div class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; num_spatial_axes_ + <span class="number">1</span>; ++i) &#123;</div><div class="line">    <span class="keyword">if</span> (reverse_dimensions()) &#123;</div><div class="line">      conv_input_shape_data[i] = top[<span class="number">0</span>]-&gt;shape(channel_axis_ + i);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">      conv_input_shape_data[i] = bottom[<span class="number">0</span>]-&gt;shape(channel_axis_ + i);</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  <span class="comment">// The im2col result buffer will only hold one image at a time to avoid</span></div><div class="line">  <span class="comment">// overly large memory usage. In the special case of 1x1 convolution</span></div><div class="line">  <span class="comment">// it goes lazily unused to save memory.</span></div><div class="line">  col_buffer_shape_.clear();</div><div class="line">  col_buffer_shape_.push_back(kernel_dim_ * group_);</div><div class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; num_spatial_axes_; ++i) &#123;</div><div class="line">    <span class="keyword">if</span> (reverse_dimensions()) &#123;</div><div class="line">      col_buffer_shape_.push_back(input_shape(i + <span class="number">1</span>));</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">      col_buffer_shape_.push_back(output_shape_[i]);</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  col_buffer_.Reshape(col_buffer_shape_);</div><div class="line">  bottom_dim_ = bottom[<span class="number">0</span>]-&gt;count(channel_axis_);</div><div class="line">  top_dim_ = top[<span class="number">0</span>]-&gt;count(channel_axis_);</div><div class="line">  num_kernels_im2col_ = conv_in_channels_ * conv_out_spatial_dim_;</div><div class="line">  num_kernels_col2im_ = reverse_dimensions() ? top_dim_ : bottom_dim_;</div><div class="line">  <span class="comment">// Set up the all ones "bias multiplier" for adding biases by BLAS</span></div><div class="line">  out_spatial_dim_ = top[<span class="number">0</span>]-&gt;count(first_spatial_axis);</div><div class="line">  <span class="keyword">if</span> (bias_term_) &#123;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; bias_multiplier_shape(<span class="number">1</span>, out_spatial_dim_);</div><div class="line">    bias_multiplier_.Reshape(bias_multiplier_shape);</div><div class="line">    caffe_set(bias_multiplier_.count(), Dtype(<span class="number">1</span>),</div><div class="line">        bias_multiplier_.mutable_cpu_data());</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="forward-cpu-gemm"><a href="#forward-cpu-gemm" class="headerlink" title="forward_cpu_gemm"></a><code>forward_cpu_gemm</code></h2><p>调用<code>conv_im2col_cpu</code>将图像对应卷积的图像块变成列向量，变成矩阵，方便后面进行矩阵乘法<br>这里需要注意的是<code>kernel_dim=输入的通道数*卷积核的高*卷积核的宽</code>。weights的形状是<code>[输出通道数，kernel_dim]</code>。<br>输入的图像的形状是<code>[图像的高\*图像的宽，输入的通道数\*卷积核的高\*卷积核的宽]</code><br>因此weights可以通过乘以输入图像的转置完成矩阵的相乘。</p>
+<p>具体可以看上一篇的博文，<a href="https://satisfie.github.io/2016/11/19/Caffe%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB-im2col/" target="_blank" rel="external">Caffe中的卷积分析</a>。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Dtype&gt;</div><div class="line"><span class="keyword">void</span> BaseConvolutionLayer&lt;Dtype&gt;::forward_cpu_gemm(<span class="keyword">const</span> Dtype* input,</div><div class="line">    <span class="keyword">const</span> Dtype* weights, Dtype* output, <span class="keyword">bool</span> skip_im2col) &#123;</div><div class="line">  <span class="keyword">const</span> Dtype* col_buff = input;</div><div class="line">  <span class="keyword">if</span> (!is_1x1_) &#123;</div><div class="line">    <span class="keyword">if</span> (!skip_im2col) &#123;</div><div class="line">      conv_im2col_cpu(input, col_buffer_.mutable_cpu_data());</div><div class="line">    &#125;</div><div class="line">    col_buff = col_buffer_.cpu_data();</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> g = <span class="number">0</span>; g &lt; group_; ++g) &#123;</div><div class="line">  </div><div class="line">     <span class="comment">//kernel_dim_=输入的通道数*卷积核的高*卷积核的宽</span></div><div class="line">  	 <span class="comment">//weights的形状是 [输出通道数,kernel_dim_]</span></div><div class="line">  	 </div><div class="line">    caffe_cpu_gemm&lt;Dtype&gt;(CblasNoTrans, CblasNoTrans, conv_out_channels_ /</div><div class="line">        group_, conv_out_spatial_dim_, kernel_dim_,</div><div class="line">        (Dtype)<span class="number">1.</span>, weights + weight_offset_ * g, col_buff + col_offset_ * g,</div><div class="line">        (Dtype)<span class="number">0.</span>, output + output_offset_ * g);</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Dtype&gt;</div><div class="line"><span class="keyword">void</span> BaseConvolutionLayer&lt;Dtype&gt;::forward_cpu_bias(Dtype* output,</div><div class="line">    <span class="keyword">const</span> Dtype* bias) &#123;</div><div class="line">  caffe_cpu_gemm&lt;Dtype&gt;(CblasNoTrans, CblasNoTrans, num_output_,</div><div class="line">      out_spatial_dim_, <span class="number">1</span>, (Dtype)<span class="number">1.</span>, bias, bias_multiplier_.cpu_data(),</div><div class="line">      (Dtype)<span class="number">1.</span>, output);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="backward-cpu-gemm"><a href="#backward-cpu-gemm" class="headerlink" title="backward_cpu_gemm"></a><code>backward_cpu_gemm</code></h2><p>主要是调用<code>conv_col2im_cpu</code>来讲列向量转回图像的形式，具体是调用了<code>col2im_cpu</code>函数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Dtype&gt;</div><div class="line"><span class="keyword">void</span> BaseConvolutionLayer&lt;Dtype&gt;::backward_cpu_gemm(<span class="keyword">const</span> Dtype* output,</div><div class="line">    <span class="keyword">const</span> Dtype* weights, Dtype* input) &#123;</div><div class="line">  Dtype* col_buff = col_buffer_.mutable_cpu_data();</div><div class="line">  <span class="keyword">if</span> (is_1x1_) &#123;</div><div class="line">    col_buff = input;</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> g = <span class="number">0</span>; g &lt; group_; ++g) &#123;</div><div class="line">    caffe_cpu_gemm&lt;Dtype&gt;(CblasTrans, CblasNoTrans, kernel_dim_,</div><div class="line">        conv_out_spatial_dim_, conv_out_channels_ / group_,</div><div class="line">        (Dtype)<span class="number">1.</span>, weights + weight_offset_ * g, output + output_offset_ * g,</div><div class="line">        (Dtype)<span class="number">0.</span>, col_buff + col_offset_ * g);</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">if</span> (!is_1x1_) &#123;</div><div class="line">    conv_col2im_cpu(col_buff, input);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="weight-cpu-gemm"><a href="#weight-cpu-gemm" class="headerlink" title="weight_cpu_gemm"></a><code>weight_cpu_gemm</code></h2><p>这个用于计算weight的导数，具体还要进一步细看</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Dtype&gt;</div><div class="line"><span class="keyword">void</span> BaseConvolutionLayer&lt;Dtype&gt;::weight_cpu_gemm(<span class="keyword">const</span> Dtype* input,</div><div class="line">    <span class="keyword">const</span> Dtype* output, Dtype* weights) &#123;</div><div class="line">  <span class="keyword">const</span> Dtype* col_buff = input;</div><div class="line">  <span class="keyword">if</span> (!is_1x1_) &#123;</div><div class="line">    conv_im2col_cpu(input, col_buffer_.mutable_cpu_data());</div><div class="line">    col_buff = col_buffer_.cpu_data();</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> g = <span class="number">0</span>; g &lt; group_; ++g) &#123;</div><div class="line">    caffe_cpu_gemm&lt;Dtype&gt;(CblasNoTrans, CblasTrans, conv_out_channels_ / group_,</div><div class="line">        kernel_dim_, conv_out_spatial_dim_,</div><div class="line">        (Dtype)<span class="number">1.</span>, output + output_offset_ * g, col_buff + col_offset_ * g,</div><div class="line">        (Dtype)<span class="number">1.</span>, weights + weight_offset_ * g);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/19/Caffe源码解读-im2col/" rel="next" title="Caffe源码解读--im2col">
+                <i class="fa fa-chevron-left"></i> Caffe源码解读--im2col
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="fb-comments"
+           data-href="http://yoursite.com/2016/11/20/Caffe源码解读6-BaseConvolutionLayer/"
+           data-numposts="10"
+           data-width="100%"
+           data-colorscheme="light">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="John Doe" />
+          <p class="site-author-name" itemprop="name">John Doe</p>
+          <p class="site-description motion-element" itemprop="description">Stay hungry</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Message-ConvolutionParameter"><span class="nav-number">1.</span> <span class="nav-text">Message ConvolutionParameter</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Message生成的ConvolutionParameter类"><span class="nav-number">2.</span> <span class="nav-text">Message生成的ConvolutionParameter类</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#对于Message中的optional字段"><span class="nav-number">2.1.</span> <span class="nav-text">对于Message中的optional字段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对于Message中的repeated字段"><span class="nav-number">2.2.</span> <span class="nav-text">对于Message中的repeated字段</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BaseConvolutionLayer类"><span class="nav-number">3.</span> <span class="nav-text">BaseConvolutionLayer类</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#protected成员变量和private变量"><span class="nav-number">3.1.</span> <span class="nav-text">protected成员变量和private变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LayerSetUp"><span class="nav-number">3.2.</span> <span class="nav-text">LayerSetUp</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reshape函数"><span class="nav-number">3.3.</span> <span class="nav-text">Reshape函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#forward-cpu-gemm"><span class="nav-number">3.4.</span> <span class="nav-text">forward_cpu_gemm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#backward-cpu-gemm"><span class="nav-number">3.5.</span> <span class="nav-text">backward_cpu_gemm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#weight-cpu-gemm"><span class="nav-number">3.6.</span> <span class="nav-text">weight_cpu_gemm</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+<div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+
+
+
+
+
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("", "");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.0"></script>
+
+
+
+</body>
+</html>
