@@ -463,7 +463,7 @@
 <p>feature map平移后转化为列向量，如下：<br><img src="http://oi8824myj.bkt.clouddn.com/conv2.png" alt="im2col2"></p>
 <p>对于$C\times H \times W$的feature map,得到的矩阵为$(H\times W,C\times K \times K)$</p>
 <p><img src="http://oi8824myj.bkt.clouddn.com/conv3.png" alt="im2col3"></p>
-<p>针对$C<em>{out}$个filters，可以得到$(C</em>{out},C\times K\times K)$的矩阵，然后与转置后的feature map相乘得到$(C_{out},H\times W)$的矩阵。<br><img src="http://oi8824myj.bkt.clouddn.com/conv4.jpg" alt="im2col4"></p>
+<p>针对$C_{out}$个filters，可以得到$(C_{out},C\times K\times K)$的矩阵，然后与转置后的feature map相乘得到$(C_{out},H\times W)$的矩阵。<br><img src="http://oi8824myj.bkt.clouddn.com/conv4.jpg" alt="im2col4"></p>
 <h1 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h1><p>计算输出的feature map的尺寸，针对的而是2D的卷积，n维的卷积与之类似。</p>
 <ul>
 <li>输出的高度: output_h = (height + 2 <em> pad_h -(dilation_h </em> (kernel_h - 1) + 1)) / stride_h + 1</li>
