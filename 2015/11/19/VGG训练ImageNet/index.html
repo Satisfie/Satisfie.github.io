@@ -84,16 +84,34 @@
 
 
 
-<meta name="description" content="以前的笔记，放上来吧1234567891011121314151617181920212223242526272829303132333435363738# 准备数据具体官网地址，请点击这里[ImageNet官网](http://www.image-net.org/signup.php?next=download-images)训练数据集：[ILSVRC2012\_img\_train.tar](">
+<meta name="description" content="以前的笔记，放上来吧
+准备数据具体官网地址，请点击这里
+ImageNet官网
+训练数据集：ILSVRC2012_img_train.tar
+验证数据集：ILSVRC2012_img_val.tar
+数据解压sudo tar –xvf  ILSVRC2012_img_train.tar -C ./trainsudo tar –xvf ILSVRC2012_img_val.tar -C ./val
+对">
 <meta property="og:type" content="article">
 <meta property="og:title" content="VGG训练ImageNet">
 <meta property="og:url" content="http://yoursite.com/2015/11/19/VGG训练ImageNet/index.html">
 <meta property="og:site_name" content="Keson's blog">
-<meta property="og:description" content="以前的笔记，放上来吧1234567891011121314151617181920212223242526272829303132333435363738# 准备数据具体官网地址，请点击这里[ImageNet官网](http://www.image-net.org/signup.php?next=download-images)训练数据集：[ILSVRC2012\_img\_train.tar](">
-<meta property="og:updated_time" content="2016-12-22T11:37:56.000Z">
+<meta property="og:description" content="以前的笔记，放上来吧
+准备数据具体官网地址，请点击这里
+ImageNet官网
+训练数据集：ILSVRC2012_img_train.tar
+验证数据集：ILSVRC2012_img_val.tar
+数据解压sudo tar –xvf  ILSVRC2012_img_train.tar -C ./trainsudo tar –xvf ILSVRC2012_img_val.tar -C ./val
+对">
+<meta property="og:updated_time" content="2016-12-22T11:39:18.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="VGG训练ImageNet">
-<meta name="twitter:description" content="以前的笔记，放上来吧1234567891011121314151617181920212223242526272829303132333435363738# 准备数据具体官网地址，请点击这里[ImageNet官网](http://www.image-net.org/signup.php?next=download-images)训练数据集：[ILSVRC2012\_img\_train.tar](">
+<meta name="twitter:description" content="以前的笔记，放上来吧
+准备数据具体官网地址，请点击这里
+ImageNet官网
+训练数据集：ILSVRC2012_img_train.tar
+验证数据集：ILSVRC2012_img_val.tar
+数据解压sudo tar –xvf  ILSVRC2012_img_train.tar -C ./trainsudo tar –xvf ILSVRC2012_img_val.tar -C ./val
+对">
 
 
 
@@ -357,7 +375,7 @@
             <span class="post-meta-item-icon">
               <i class="fa fa-calendar-check-o"></i>
             </span>
-            <time title="Post modified" itemprop="dateModified" datetime="2016-12-22T19:37:56+08:00">
+            <time title="Post modified" itemprop="dateModified" datetime="2016-12-22T19:39:18+08:00">
               2016-12-22
             </time>
             
@@ -412,7 +430,23 @@
       
 
       
-        <p>以前的笔记，放上来吧<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"># 准备数据</div><div class="line">具体官网地址，请点击这里</div><div class="line"></div><div class="line">[ImageNet官网](http://www.image-net.org/signup.php?next=download-images)</div><div class="line"></div><div class="line">训练数据集：[ILSVRC2012\_img\_train.tar](http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_train.tar)</div><div class="line"></div><div class="line">验证数据集：[ILSVRC2012\_img\_val.tar](http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_val.tar)</div><div class="line"></div><div class="line"></div><div class="line">## 数据解压</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">`sudo tar –xvf  ILSVRC2012_img_train.tar -C ./train`</div><div class="line">`sudo tar –xvf ILSVRC2012_img_val.tar -C ./val`</div><div class="line"></div><div class="line">对于`val`数据集，解压以后是所有的验证集图片，共50000张，大约6.3G。</div><div class="line"></div><div class="line">对于`train`数据集，解压后是1000个tar文件，每个tar文件表示1000类里的一个类，共138G，对于1000个子tar，需要再次解压，解压脚本`unzip.sh`如下</div><div class="line"></div><div class="line">```bash</div><div class="line">dir=/home/satisfie/imagenet/train #satisfie 是我的用户名</div><div class="line">for x in `ls *.tar`</div><div class="line">do</div><div class="line">	filename=`basename $x .tar`   #注意空格</div><div class="line">	mkdir $filename</div><div class="line">	tar -xvf $x -C ./$filename</div><div class="line">done</div><div class="line">```</div><div class="line">i7 6700K配合我的500G固态硬盘解压超快，到这原始数据就准备好了，分别放在</div><div class="line"></div><div class="line">- `/home/satisfie/imagenet/train`：里面有1000个文件夹，每个文件夹下为JPG图片</div><div class="line"></div><div class="line">- `/home/satisfie/imagenet/val` ：里面有验证集的50000张图片</div><div class="line"></div><div class="line">接下来下载标签等其他说明数据</div></pre></td></tr></table></figure></p>
+        <p>以前的笔记，放上来吧</p>
+<h1 id="准备数据"><a href="#准备数据" class="headerlink" title="准备数据"></a>准备数据</h1><p>具体官网地址，请点击这里</p>
+<p><a href="http://www.image-net.org/signup.php?next=download-images" target="_blank" rel="external">ImageNet官网</a></p>
+<p>训练数据集：<a href="http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_train.tar" target="_blank" rel="external">ILSVRC2012_img_train.tar</a></p>
+<p>验证数据集：<a href="http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_val.tar" target="_blank" rel="external">ILSVRC2012_img_val.tar</a></p>
+<h2 id="数据解压"><a href="#数据解压" class="headerlink" title="数据解压"></a>数据解压</h2><p><code>sudo tar –xvf  ILSVRC2012_img_train.tar -C ./train</code><br><code>sudo tar –xvf ILSVRC2012_img_val.tar -C ./val</code></p>
+<p>对于<code>val</code>数据集，解压以后是所有的验证集图片，共50000张，大约6.3G。</p>
+<p>对于<code>train</code>数据集，解压后是1000个tar文件，每个tar文件表示1000类里的一个类，共138G，对于1000个子tar，需要再次解压，解压脚本<code>unzip.sh</code>如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">dir=/home/satisfie/imagenet/train <span class="comment">#satisfie 是我的用户名</span></div><div class="line"><span class="keyword">for</span> x <span class="keyword">in</span> `ls *.tar`</div><div class="line"><span class="keyword">do</span></div><div class="line">	filename=`basename <span class="variable">$x</span> .tar`   <span class="comment">#注意空格</span></div><div class="line">	mkdir <span class="variable">$filename</span></div><div class="line">	tar -xvf <span class="variable">$x</span> -C ./<span class="variable">$filename</span></div><div class="line"><span class="keyword">done</span></div></pre></td></tr></table></figure>
+<p>i7 6700K配合我的500G固态硬盘解压超快，到这原始数据就准备好了，分别放在</p>
+<ul>
+<li><p><code>/home/satisfie/imagenet/train</code>：里面有1000个文件夹，每个文件夹下为JPG图片</p>
+</li>
+<li><p><code>/home/satisfie/imagenet/val</code> ：里面有验证集的50000张图片</p>
+</li>
+</ul>
+<p>接下来下载标签等其他说明数据~~~</p>
 <h2 id="下载其他数据"><a href="#下载其他数据" class="headerlink" title="下载其他数据"></a>下载其他数据</h2><p>进入大<code>caffe</code>根目录，执行<code>/data/ilsvrc12/get_ilsvrc_aux.sh</code>下载其他数据，包括</p>
 <ul>
 <li><code>det_synset_words.txt</code></li>
@@ -593,7 +627,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#下载其他数据"><span class="nav-number">1.</span> <span class="nav-text">下载其他数据</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#模型的训练"><span class="nav-number"></span> <span class="nav-text">模型的训练</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#训练数据准备"><span class="nav-number">1.</span> <span class="nav-text">训练数据准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VGG-train-val-prototxt"><span class="nav-number">2.</span> <span class="nav-text">VGG_train_val.prototxt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#solver-prototxt"><span class="nav-number">3.</span> <span class="nav-text">solver.prototxt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#finetuning"><span class="nav-number">4.</span> <span class="nav-text">finetuning</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#准备数据"><span class="nav-number">1.</span> <span class="nav-text">准备数据</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据解压"><span class="nav-number">1.1.</span> <span class="nav-text">数据解压</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#下载其他数据"><span class="nav-number">1.2.</span> <span class="nav-text">下载其他数据</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#模型的训练"><span class="nav-number">2.</span> <span class="nav-text">模型的训练</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#训练数据准备"><span class="nav-number">2.1.</span> <span class="nav-text">训练数据准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VGG-train-val-prototxt"><span class="nav-number">2.2.</span> <span class="nav-text">VGG_train_val.prototxt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#solver-prototxt"><span class="nav-number">2.3.</span> <span class="nav-text">solver.prototxt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#finetuning"><span class="nav-number">2.4.</span> <span class="nav-text">finetuning</span></a></li></ol></li></ol></div>
             
 
           </div>
