@@ -84,31 +84,47 @@
 
 
 
-<meta name="description" content="在Jetson TX1 上训练darknet本文介绍在Jetson TX1上用VOC2007数据集训练YOLO。
-Reference:
-YOLO主页
-1 下载数据集Pascal VOC 数据集是一个用来进行目标检测的数据集，官网链接pascal voc
-从上面下载VOC2007 的数据集，解压后放到 /darknet/scripts  
-2 修改scripts下的voc_label.py可以用来将">
+<meta name="description" content="Caffe解读1 – Pinned Memory Vs. Non-Pinned Memory
+
+在解读Caffe之前，我们先需要对GPU通信和CPU的内存分配和内存传输有一定的了解，具体可以参考CUDA编程方面的书。这里我们先了解一下CUDA中的显存分配与释放
+
+Reference
+
+Choosing Between Pinned and Non-Pinned Memory
+Memory Allo">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Jetson TX1 训练darknet">
-<meta property="og:url" content="http://yoursite.com/2016/11/26/Jetson-TX1-训练darknet/index.html">
+<meta property="og:title" content="Caffe解读1 -- Pinned Memory Vs. Non-Pinned Memory">
+<meta property="og:url" content="http://yoursite.com/2016/06/06/Caffe解读1-Pinned-Memory-Vs-Non-Pinned-Memory/index.html">
 <meta property="og:site_name" content="Keson's blog">
-<meta property="og:description" content="在Jetson TX1 上训练darknet本文介绍在Jetson TX1上用VOC2007数据集训练YOLO。
-Reference:
-YOLO主页
-1 下载数据集Pascal VOC 数据集是一个用来进行目标检测的数据集，官网链接pascal voc
-从上面下载VOC2007 的数据集，解压后放到 /darknet/scripts  
-2 修改scripts下的voc_label.py可以用来将">
-<meta property="og:updated_time" content="2017-03-06T02:36:00.000Z">
+<meta property="og:description" content="Caffe解读1 – Pinned Memory Vs. Non-Pinned Memory
+
+在解读Caffe之前，我们先需要对GPU通信和CPU的内存分配和内存传输有一定的了解，具体可以参考CUDA编程方面的书。这里我们先了解一下CUDA中的显存分配与释放
+
+Reference
+
+Choosing Between Pinned and Non-Pinned Memory
+Memory Allo">
+<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/malloc_time_per_call.png">
+<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/malloc_time_per_byte.png">
+<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/free_time_per_call.png">
+<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/free_time_per_byte.png">
+<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/transfer_time.png">
+<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/transfer_throughput.png">
+<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/pinned_two-way.png">
+<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/pinned_one-way.png">
+<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/pinned_speedup.png">
+<meta property="og:updated_time" content="2017-03-06T08:37:19.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Jetson TX1 训练darknet">
-<meta name="twitter:description" content="在Jetson TX1 上训练darknet本文介绍在Jetson TX1上用VOC2007数据集训练YOLO。
-Reference:
-YOLO主页
-1 下载数据集Pascal VOC 数据集是一个用来进行目标检测的数据集，官网链接pascal voc
-从上面下载VOC2007 的数据集，解压后放到 /darknet/scripts  
-2 修改scripts下的voc_label.py可以用来将">
+<meta name="twitter:title" content="Caffe解读1 -- Pinned Memory Vs. Non-Pinned Memory">
+<meta name="twitter:description" content="Caffe解读1 – Pinned Memory Vs. Non-Pinned Memory
+
+在解读Caffe之前，我们先需要对GPU通信和CPU的内存分配和内存传输有一定的了解，具体可以参考CUDA编程方面的书。这里我们先了解一下CUDA中的显存分配与释放
+
+Reference
+
+Choosing Between Pinned and Non-Pinned Memory
+Memory Allo">
+<meta name="twitter:image" content="http://oi8824myj.bkt.clouddn.com/malloc_time_per_call.png">
 
 
 
@@ -136,13 +152,13 @@ YOLO主页
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/11/26/Jetson-TX1-训练darknet/"/>
+  <link rel="canonical" href="http://yoursite.com/2016/06/06/Caffe解读1-Pinned-Memory-Vs-Non-Pinned-Memory/"/>
 
 
 
 
 
-  <title> Jetson TX1 训练darknet | Keson's blog </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  <title> Caffe解读1 -- Pinned Memory Vs. Non-Pinned Memory | Keson's blog </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -327,7 +343,7 @@ YOLO主页
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/26/Jetson-TX1-训练darknet/">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/06/06/Caffe解读1-Pinned-Memory-Vs-Non-Pinned-Memory/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
     <meta itemprop="name" content="John Doe">
@@ -351,7 +367,7 @@ YOLO主页
             
             
               
-                Jetson TX1 训练darknet
+                Caffe解读1 -- Pinned Memory Vs. Non-Pinned Memory
               
             
           </h1>
@@ -363,8 +379,8 @@ YOLO主页
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-11-26T10:35:13+08:00">
-              2016-11-26
+            <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-06-06T16:36:22+08:00">
+              2016-06-06
             </time>
 
             &nbsp;|&nbsp;
@@ -372,7 +388,7 @@ YOLO主页
             <span class="post-meta-item-icon">
               <i class="fa fa-calendar-check-o"></i>
             </span>
-            <time title="Post modified" itemprop="dateModified" datetime="2017-03-06T10:36:00+08:00">
+            <time title="Post modified" itemprop="dateModified" datetime="2017-03-06T16:37:19+08:00">
               2017-03-06
             </time>
             
@@ -384,8 +400,8 @@ YOLO主页
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/11/26/Jetson-TX1-训练darknet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count fb-comments-count" data-href="http://yoursite.com/2016/11/26/Jetson-TX1-训练darknet/" itemprop="commentCount">0</span> comments
+                <a href="/2016/06/06/Caffe解读1-Pinned-Memory-Vs-Non-Pinned-Memory/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count fb-comments-count" data-href="http://yoursite.com/2016/06/06/Caffe解读1-Pinned-Memory-Vs-Non-Pinned-Memory/" itemprop="commentCount">0</span> comments
                 </a>
               </span>
             
@@ -397,7 +413,7 @@ YOLO主页
 
           
           
-             <span id="/2016/11/26/Jetson-TX1-训练darknet/" class="leancloud_visitors" data-flag-title="Jetson TX1 训练darknet">
+             <span id="/2016/06/06/Caffe解读1-Pinned-Memory-Vs-Non-Pinned-Memory/" class="leancloud_visitors" data-flag-title="Caffe解读1 -- Pinned Memory Vs. Non-Pinned Memory">
                &nbsp; | &nbsp;
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -427,20 +443,57 @@ YOLO主页
       
 
       
-        <h1 id="在Jetson-TX1-上训练darknet"><a href="#在Jetson-TX1-上训练darknet" class="headerlink" title="在Jetson TX1 上训练darknet"></a>在Jetson TX1 上训练darknet</h1><p>本文介绍在Jetson TX1上用VOC2007数据集训练YOLO。</p>
-<p>Reference:</p>
-<p><a href="http://pjreddie.com/darknet/yolo/" target="_blank" rel="external">YOLO主页</a></p>
-<h2 id="1-下载数据集"><a href="#1-下载数据集" class="headerlink" title="1 下载数据集"></a>1 下载数据集</h2><p>Pascal VOC 数据集是一个用来进行目标检测的数据集，官网链接<a href="http://host.robots.ox.ac.uk/pascal/VOC/" target="_blank" rel="external">pascal voc</a></p>
-<p>从上面下载VOC2007 的数据集，解压后放到 /darknet/scripts  </p>
-<h2 id="2-修改"><a href="#2-修改" class="headerlink" title="2 修改"></a>2 修改</h2><p>scripts下的voc_label.py可以用来将voc数据集转换成yolo格式的数据集，对voc_label.py进行修改</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sets=[(<span class="string">'2007'</span>,<span class="string">'train'</span>),(<span class="string">'2007'</span>,<span class="string">'val'</span>)] //这里只用了VOC2007里的train和validation数据集</div></pre></td></tr></table></figure>
-<p>如果是自己的数据集，需要相应的修改成VOC格式，在进行修改，<br>可以参考这里<a href="http://blog.csdn.net/sinat_30071459/article/details/53100791" target="_blank" rel="external">YOLO(v1)用自己的数据集训练模型</a><br><a href="http://blog.csdn.net/sinat_30071459/article/details/50723212" target="_blank" rel="external">做自己的VOC2007数据集</a></p>
-<p>运行pyhon voc_label.py后可以发现/VOCdevkit/VOC2007 下多了一个labels文件夹。</p>
-<h2 id="修改YOLO-源码"><a href="#修改YOLO-源码" class="headerlink" title="修改YOLO 源码"></a>修改YOLO 源码</h2><p>然后修改/darknet/src/yolo.c中的源码</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">char</span> *train_images=<span class="string">"/home/ubuntu/darknet/scripts/2007_train.txt"</span> </div><div class="line"><span class="keyword">char</span> *backup_directory= <span class="string">"/home/ubuntu/darknet/backup"</span> <span class="comment">//用来保存中间的权重</span></div></pre></td></tr></table></figure>
-<h3 id="重新训练"><a href="#重新训练" class="headerlink" title="重新训练"></a>重新训练</h3><p>make编译后，可以重新训练</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">./darknet yolo train cfg/tiny-yolo.cfg darknet.conv.weights</div><div class="line">``` </div><div class="line">darknet.conv.weights 是卷积网络在分类网络上预训练的权重，在此基础上训练，</div><div class="line">可以从这里下载[darknet.conv.weights](http://download.csdn.net/detail/kesonyk/9707462)</div><div class="line"></div><div class="line">下载后放到/darknet目录即可</div><div class="line"></div><div class="line">### 在Jetson TX1 上训练时的技巧</div><div class="line">由于TX1 只有4G的共用内存和显存，因此batch需要重新设置，更改tiny-yolo.cfg的配置</div></pre></td></tr></table></figure>
-<p>batch=64<br>subdivisions=8<br>```<br>其中batch是64，指的是64张图片后更新权重，subdivions是为了适应GPU有限的资源，在这里GPU每次只处理 8(64/8)张图片.所以是进行8个新的子batch后更新权重。</p>
+        <p>Caffe解读1 – Pinned Memory Vs. Non-Pinned Memory</p>
+<ul>
+<li>在解读Caffe之前，我们先需要对GPU通信和CPU的内存分配和内存传输有一定的了解，具体可以参考CUDA编程方面的书。这里我们先了解一下CUDA中的显存分配与释放</li>
+</ul>
+<p><code>Reference</code></p>
+<ul>
+<li><a href="https://www.cs.virginia.edu/~mwb7w/cuda_support/pinned_tradeoff.html" target="_blank" rel="external">Choosing Between Pinned and Non-Pinned Memory</a></li>
+<li><a href="https://www.cs.virginia.edu/~mwb7w/cuda_support/memory_management_overhead.html" target="_blank" rel="external">Memory Allocation Overhead</a></li>
+<li><a href="https://www.cs.virginia.edu/~mwb7w/cuda_support/memory_transfer_overhead.html" target="_blank" rel="external">Memory Transfer Overhead</a></li>
+</ul>
+<h1 id="内存分配"><a href="#内存分配" class="headerlink" title="内存分配"></a>内存分配</h1><p>关于协调CPU和GPU之间的内存创建和分配以及传输</p>
+<h2 id="CPU分配内存"><a href="#CPU分配内存" class="headerlink" title="CPU分配内存"></a>CPU分配内存</h2><p>CPU分配内存主要有两种方式：</p>
+<ul>
+<li>通过C标准库中的<code>malloc</code>函数完成</li>
+<li>调用CUDA中的<code>cudaMallocHost</code>函数</li>
+</ul>
+<p><code>cudaMallocHost</code>函数通过页面锁定，可以提供更高的CPU和GPU传输速率，吞吐量增加是Barracuda10的2.4倍，Barracuda04的2.0倍，Barracuda01的1.5倍。但是缺点是使用<code>cudaMallocHost</code>分配内存比<code>malloc</code>更加慢，<br>每次调用<code>cudaMallocHost</code>分配1M的内存需要2300微妙左右，当需要分配512M，时间上升到61毫秒，比<code>malloc</code>在分配时慢了3-5个量级</p>
+<h2 id="GPU分配内存"><a href="#GPU分配内存" class="headerlink" title="GPU分配内存"></a>GPU分配内存</h2><p>GPU的分配方式有：</p>
+<ul>
+<li>通过CUDA的<code>cudaMalloc</code>函数</li>
+<li><code>cudaMallocPitch</code>函数</li>
+<li><code>cudaMallocArray</code>函数</li>
+</ul>
+<p><code>cudaMallocPitch</code> 和 <code>cudaMallocArray</code>都没有<code>cudaMalloc</code>来的快。<code>cudaMalloc</code>的分配时间如图1所示，256bytes的调用分配耗时1微妙，2KB到4KB分配耗时有显著提升，接下来在512KB分配大约需要50微妙，大于512K时，耗时显著提升，当分配512M时，需要12.5毫秒左右。总而言之，在小于4M时，<code>cudaMalloc</code>分配速度比<code>malloc</code>慢1.5个量级，大于4MB时，<code>cudaMalloc</code>比<code>malloc</code>慢2-4个量级。</p>
+<p> <img src="http://oi8824myj.bkt.clouddn.com/malloc_time_per_call.png" alt="不同函数分配内存的调用时间"><br> <center> 图1.不同函数分配CPU和GPU内存的调用时间</center></p>
+<p> <img src="http://oi8824myj.bkt.clouddn.com/malloc_time_per_byte.png" alt="不同函数每个Byte分配的平均时间"><br> <center> 图2.不同函数分配CPU和GPU每个Byte内存的时间消耗</center></p>
+<h1 id="内存释放"><a href="#内存释放" class="headerlink" title="内存释放"></a>内存释放</h1><p>每个内存分配函数都有对应的内存释放函数，如<code>free</code>对应于<code>malloc</code>,<code>cudaFree</code>对应于<code>cudaMalloc</code>,<code>cudaFreeHost</code>对应于<code>cudaMallocHost</code></p>
+<p>图3显示了不同的释放函数随着释放内存大小的调用耗时的比较,与分配时相似，<code>cudaFreeHost</code>比<code>free</code>慢3-5个量级，<code>cudaFree</code>比<code>free</code>慢2-3个量级。</p>
+<p><img src="http://oi8824myj.bkt.clouddn.com/free_time_per_call.png" alt="不同函数释放内存的调用时间"><br> <center> 图3.不同函数释放内存的调用时间</center></p>
+<p> <img src="http://oi8824myj.bkt.clouddn.com/free_time_per_byte.png" alt="不同函数每个Byte数据的释放平均时间"><br>  <center> 图4.不同函数每个Byte内存的释放消耗时间</center></p>
+<h1 id="CPU和GPU之间的内存传输"><a href="#CPU和GPU之间的内存传输" class="headerlink" title="CPU和GPU之间的内存传输"></a>CPU和GPU之间的内存传输</h1><p>在GPU核执行任务前，需要把数据都从CPU内存传输到GPU内存，任务完成后，再将运算结果或处理后的数据传回CPU，常用的函数是<code>cudaMemcpy</code></p>
+<p>图5显示了使用<code>cudaMemcpy</code>传输不同大小的内存的平均传输时间，硬件设置如下:  3.20 GHz Core 2 Extreme processor, GTX 280 GPU, and PCIe version 2.0。测试了4种不同的配置: Non-Pinned to Device, Non-Pinned from Device, Pinned to Device 和 Pinned from Device。</p>
+<p><img src="http://oi8824myj.bkt.clouddn.com/transfer_time.png" alt="four measures"><br>  <center> 图5.<code>cudaMemcpy</code>传输不同大小的内存的平均传输时间</center><br>  可以看到，对于传输小规模的内存，基本都是10微妙级别的常量时间。从8K大小开始，传输速度呈现线性增长。</p>
+<p>  图6显示了传输相同大小的字节的平均吞吐率，对于小块数据，差异不大，对于大块数据，Pinned memory提供了2.4倍于Non-Pinned memory的吞吐率。<br><img src="http://oi8824myj.bkt.clouddn.com/transfer_throughput.png" alt="吞吐率"><br>  <center> 图6.传输相同大小的字节的平均吞吐率</center></p>
+<h1 id="选择-Pinned-或者-Non-Pinned-Memory"><a href="#选择-Pinned-或者-Non-Pinned-Memory" class="headerlink" title="选择 Pinned 或者 Non-Pinned Memory"></a>选择 Pinned 或者 Non-Pinned Memory</h1><p>当需要分配CPU内存且会传输到GPU时，有两种方式可以选择：<code>pinned</code> 和 <code>non-pinned</code>。</p>
+<p>Pinned memory使用<code>cudaMallocHost</code>来分配CPU内存,可以防止内存页被交换出去，因此可以提供更高的传输速度。Non-pinned memory使用<code>malloc</code>函数分配CPU内存。但是Pinned memory 比Non-pinned memory有更昂贵的内存分配和释放，因为<code>cudaMallocHost</code>分配和释放CPU内存相比<code>malloc</code>更加耗时。</p>
+<p>因此，一个很明显的问题是：<code>当分配多少内存时，选择pinned-memory方式的性能更加优越？</code></p>
+<p>主要有以下两类情况，在这两类情况下，我们都假设内存的分配和释放都执行了1次。<br>（1）假设分配的内存被用来从CPU传到GPU，然后从GPU传回CPU，两次传输的size相同<br>（2）假设分配的内存全部从CPU传到GPU，然后从GPU只是传递了运算结果回CPU，这种情况下GPU核通常执行的是reduction操作，比如常见的计算平均数。</p>
+<p>在第一种情况下，我们可以看到图7的对比结果，结果显示，只有当内存的大小超过16MB时，使用Pinned memory才有更优越的性能。<br><img src="http://oi8824myj.bkt.clouddn.com/pinned_two-way.png" alt="two way"></p>
+<p><center> 图7.Non-Pinned vs. Pinned (两次传输size相同)</center></p>
+<p>在第二中情况下，我们可以看到图8的对比结果，结果显示，Pinned 方式没有优越性，应该选择 Non-Pinned方式。</p>
+<p><img src="http://oi8824myj.bkt.clouddn.com/pinned_one-way.png" alt="one way"></p>
+<p><center> 图8.Non-Pinned vs. Pinned (两次传输size不相同)</center></p>
+<p>我们接着比较实用Pinned Memory来分配内存的情况下，（1）和（2）两种情况的性能提升对比，如图9所示：<br><img src="http://oi8824myj.bkt.clouddn.com/pinned_speedup.png" alt="pinned memmory two way"></p>
+<p><center> 图9. 两种方式下Pinned Memory对于性能的提升</center></p>
+<p>我们可以看到，对于第1种情况，当传输的内存大于10M时才有意义，对于第2种情况，传输的数据大于128M时才有意义。</p>
+<h1 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h1><ul>
+<li>使用<code>Pinned Memory</code>方式的CPU和GPU之间传输速度更大，但是分配和释放的耗时更大</li>
+<li>使用<code>Non-Pinned Memory</code>的方式CPU和GPU之间传输耗时更大，但是分配和释放更快</li>
+<li>具体使用哪种方式，要结合数据的大小以及CPU和GPU之间传输的类型，当传输的数据比较大，且均需从CPU传至GPU和从GPU传至CPU时，使用<code>Pinned Memory</code>有比较大的性能，具体可以看图9的对比。</li>
+</ul>
 
       
     </div>
@@ -467,18 +520,14 @@ YOLO主页
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/11/20/Caffe源码解读4-激活函数/" rel="next" title="Caffe源码解读4--激活函数">
-                <i class="fa fa-chevron-left"></i> Caffe源码解读4--激活函数
-              </a>
-            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/11/27/Caffe-Layer-学习/" rel="prev" title="Caffe Layer 学习">
-                Caffe Layer 学习 <i class="fa fa-chevron-right"></i>
+              <a href="/2016/08/19/VGG训练ImageNet/" rel="prev" title="VGG训练ImageNet">
+                VGG训练ImageNet <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -506,7 +555,7 @@ YOLO主页
   <div class="comments" id="comments">
     
       <div class="fb-comments"
-           data-href="http://yoursite.com/2016/11/26/Jetson-TX1-训练darknet/"
+           data-href="http://yoursite.com/2016/06/06/Caffe解读1-Pinned-Memory-Vs-Non-Pinned-Memory/"
            data-numposts="10"
            data-width="100%"
            data-colorscheme="light">
@@ -606,7 +655,7 @@ YOLO主页
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#在Jetson-TX1-上训练darknet"><span class="nav-number">1.</span> <span class="nav-text">在Jetson TX1 上训练darknet</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-下载数据集"><span class="nav-number">1.1.</span> <span class="nav-text">1 下载数据集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-修改"><span class="nav-number">1.2.</span> <span class="nav-text">2 修改</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改YOLO-源码"><span class="nav-number">1.3.</span> <span class="nav-text">修改YOLO 源码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#重新训练"><span class="nav-number">1.3.1.</span> <span class="nav-text">重新训练</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#内存分配"><span class="nav-number">1.</span> <span class="nav-text">内存分配</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CPU分配内存"><span class="nav-number">1.1.</span> <span class="nav-text">CPU分配内存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GPU分配内存"><span class="nav-number">1.2.</span> <span class="nav-text">GPU分配内存</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#内存释放"><span class="nav-number">2.</span> <span class="nav-text">内存释放</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CPU和GPU之间的内存传输"><span class="nav-number">3.</span> <span class="nav-text">CPU和GPU之间的内存传输</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#选择-Pinned-或者-Non-Pinned-Memory"><span class="nav-number">4.</span> <span class="nav-text">选择 Pinned 或者 Non-Pinned Memory</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#结论"><span class="nav-number">5.</span> <span class="nav-text">结论</span></a></li></ol></div>
             
 
           </div>
