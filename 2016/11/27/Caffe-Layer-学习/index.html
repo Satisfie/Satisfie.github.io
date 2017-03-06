@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="cuda," />
+  <meta name="keywords" content="learn, think" />
 
 
 
@@ -84,38 +84,16 @@
 
 
 
-<meta name="description" content="首先需要介绍一下Pinned Memory 和 Non-Pinned Memory,关于CPU和GPU内存的分配和传输可以具体可以Google这里：
-Choosing Between Pinned and Non-Pinned Memory
-Memory Allocation Overhead
-Memory Transfer Overhead
-内存管理为了协调CPU和GPU之间的内存创建和分配，">
+<meta name="description" content="Stay hungry">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Pinned Memory Vs. Non-Pinned Memory">
-<meta property="og:url" content="http://yoursite.com/2016/09/15/Pinned-Memory-Vs-Non-Pinned-Memory/index.html">
+<meta property="og:title" content="Caffe Layer 学习">
+<meta property="og:url" content="http://yoursite.com/2016/11/27/Caffe-Layer-学习/index.html">
 <meta property="og:site_name" content="Keson's blog">
-<meta property="og:description" content="首先需要介绍一下Pinned Memory 和 Non-Pinned Memory,关于CPU和GPU内存的分配和传输可以具体可以Google这里：
-Choosing Between Pinned and Non-Pinned Memory
-Memory Allocation Overhead
-Memory Transfer Overhead
-内存管理为了协调CPU和GPU之间的内存创建和分配，">
-<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/malloc_time_per_call.png">
-<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/malloc_time_per_byte.png">
-<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/free_time_per_call.png">
-<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/free_time_per_byte.png">
-<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/transfer_time.png">
-<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/transfer_throughput.png">
-<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/pinned_two-way.png">
-<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/pinned_one-way.png">
-<meta property="og:image" content="http://oi8824myj.bkt.clouddn.com/pinned_speedup.png">
-<meta property="og:updated_time" content="2016-12-15T13:42:31.000Z">
+<meta property="og:description" content="Stay hungry">
+<meta property="og:updated_time" content="2017-02-27T08:13:43.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Pinned Memory Vs. Non-Pinned Memory">
-<meta name="twitter:description" content="首先需要介绍一下Pinned Memory 和 Non-Pinned Memory,关于CPU和GPU内存的分配和传输可以具体可以Google这里：
-Choosing Between Pinned and Non-Pinned Memory
-Memory Allocation Overhead
-Memory Transfer Overhead
-内存管理为了协调CPU和GPU之间的内存创建和分配，">
-<meta name="twitter:image" content="http://oi8824myj.bkt.clouddn.com/malloc_time_per_call.png">
+<meta name="twitter:title" content="Caffe Layer 学习">
+<meta name="twitter:description" content="Stay hungry">
 
 
 
@@ -143,13 +121,13 @@ Memory Transfer Overhead
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/09/15/Pinned-Memory-Vs-Non-Pinned-Memory/"/>
+  <link rel="canonical" href="http://yoursite.com/2016/11/27/Caffe-Layer-学习/"/>
 
 
 
 
 
-  <title> Pinned Memory Vs. Non-Pinned Memory | Keson's blog </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  <title> Caffe Layer 学习 | Keson's blog </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -334,7 +312,7 @@ Memory Transfer Overhead
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/15/Pinned-Memory-Vs-Non-Pinned-Memory/">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/27/Caffe-Layer-学习/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
     <meta itemprop="name" content="John Doe">
@@ -358,7 +336,7 @@ Memory Transfer Overhead
             
             
               
-                Pinned Memory Vs. Non-Pinned Memory
+                Caffe Layer 学习
               
             
           </h1>
@@ -370,8 +348,8 @@ Memory Transfer Overhead
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-15T21:37:56+08:00">
-              2016-09-15
+            <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-11-27T16:13:13+08:00">
+              2016-11-27
             </time>
 
             &nbsp;|&nbsp;
@@ -379,8 +357,8 @@ Memory Transfer Overhead
             <span class="post-meta-item-icon">
               <i class="fa fa-calendar-check-o"></i>
             </span>
-            <time title="Post modified" itemprop="dateModified" datetime="2016-12-15T21:42:31+08:00">
-              2016-12-15
+            <time title="Post modified" itemprop="dateModified" datetime="2017-02-27T16:13:43+08:00">
+              2017-02-27
             </time>
             
           </span>
@@ -391,8 +369,8 @@ Memory Transfer Overhead
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/09/15/Pinned-Memory-Vs-Non-Pinned-Memory/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count fb-comments-count" data-href="http://yoursite.com/2016/09/15/Pinned-Memory-Vs-Non-Pinned-Memory/" itemprop="commentCount">0</span> comments
+                <a href="/2016/11/27/Caffe-Layer-学习/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count fb-comments-count" data-href="http://yoursite.com/2016/11/27/Caffe-Layer-学习/" itemprop="commentCount">0</span> comments
                 </a>
               </span>
             
@@ -404,7 +382,7 @@ Memory Transfer Overhead
 
           
           
-             <span id="/2016/09/15/Pinned-Memory-Vs-Non-Pinned-Memory/" class="leancloud_visitors" data-flag-title="Pinned Memory Vs. Non-Pinned Memory">
+             <span id="/2016/11/27/Caffe-Layer-学习/" class="leancloud_visitors" data-flag-title="Caffe Layer 学习">
                &nbsp; | &nbsp;
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -434,48 +412,7 @@ Memory Transfer Overhead
       
 
       
-        <p>首先需要介绍一下Pinned Memory 和 Non-Pinned Memory,关于CPU和GPU内存的分配和传输可以具体可以Google这里：</p>
-<p><a href="https://www.cs.virginia.edu/~mwb7w/cuda_support/pinned_tradeoff.html" target="_blank" rel="external">Choosing Between Pinned and Non-Pinned Memory</a></p>
-<p><a href="https://www.cs.virginia.edu/~mwb7w/cuda_support/memory_management_overhead.html" target="_blank" rel="external">Memory Allocation Overhead</a></p>
-<p><a href="https://www.cs.virginia.edu/~mwb7w/cuda_support/memory_transfer_overhead.html" target="_blank" rel="external">Memory Transfer Overhead</a></p>
-<h1 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h1><p>为了协调CPU和GPU之间的内存创建和分配，</p>
-<h2 id="CPU分配"><a href="#CPU分配" class="headerlink" title="CPU分配"></a>CPU分配</h2><p>CPU分配内存主要有两种方式：</p>
-<ul>
-<li>通过C标准库中的<code>malloc</code>函数完成</li>
-<li>调用CUDA中的<code>cudaMallocHost</code>函数</li>
-</ul>
-<p><code>cudaMallocHost</code>函数通过页面锁定，可以提供更高的CPU和GPU传输速率，吞吐量增加是Barracuda10的2.4倍，Barracuda04的2.0倍，Barracuda01的1.5倍。但是缺点是使用<code>cudaMallocHost</code>分配内存比<code>malloc</code>更加慢，<br>每次调用<code>cudaMallocHost</code>分配1M的内存需要2300微妙左右，当需要分配512M，时间上升到61毫秒，比<code>malloc</code>在分配时慢了3-5个量级</p>
-<h2 id="GPU分配"><a href="#GPU分配" class="headerlink" title="GPU分配"></a>GPU分配</h2><p>GPU的分配方式有：</p>
-<ul>
-<li>通过CUDA的<code>cudaMalloc</code>函数</li>
-<li><code>cudaMallocPitch</code>函数</li>
-<li><code>cudaMallocArray</code>函数</li>
-</ul>
-<p><code>cudaMallocPitch</code> 和 <code>cudaMallocArray</code>都没有<code>cudaMalloc</code>来的快。<code>cudaMalloc</code>的分配时间如图1所示，256bytes的调用分配耗时1微妙，2KB到4KB分配耗时有显著提升，接下来在512KB分配大约需要50微妙，大于512K时，耗时显著提升，当分配512M时，需要12.5毫秒左右。总而言之，在小于4M时，<code>cudaMalloc</code>分配速度比<code>malloc</code>慢1.5个量级，大于4MB时，<code>cudaMalloc</code>比<code>malloc</code>慢2-4个量级。</p>
-<p>图1为不同函数分配不同内存的调用时间<br> <img src="http://oi8824myj.bkt.clouddn.com/malloc_time_per_call.png" alt="不同函数分配内存的调用时间"></p>
-<p>图2为不同函数每个Byte分配的平均时间<br><img src="http://oi8824myj.bkt.clouddn.com/malloc_time_per_byte.png" alt="不同函数每个Byte分配的平均时间"></p>
-<h2 id="内存释放"><a href="#内存释放" class="headerlink" title="内存释放"></a>内存释放</h2><p>每个内存分配函数都有对应的内存释放函数，如<code>free</code>对应于<code>malloc</code>,<code>cudaFree</code>对应于<code>cudaMalloc</code>,<code>cudaFreeHost</code>对应于<code>cudaMallocHost</code></p>
-<p>图3显示了不同的释放函数随着释放内存大小的调用耗时的比较,与分配时相似，<code>cudaFreeHost</code>比<code>free</code>慢3-5个量级，<code>cudaFree</code>比<code>free</code>慢2-3个量级。</p>
-<p><img src="http://oi8824myj.bkt.clouddn.com/free_time_per_call.png" alt="不同函数释放内存的调用时间"></p>
-<p>图4显示了不同函数每个Byte数据的释放平均时间<br><img src="http://oi8824myj.bkt.clouddn.com/free_time_per_byte.png" alt="不同函数每个Byte数据的释放平均时间"></p>
-<h1 id="CPU和GPU之间的内存传输"><a href="#CPU和GPU之间的内存传输" class="headerlink" title="CPU和GPU之间的内存传输"></a>CPU和GPU之间的内存传输</h1><p>在GPU核执行任务前，需要把数据都从CPU内存传输到GPU内存，任务完成后，再将运算结果或处理后的数据传回CPU，常用的函数是<code>cudaMemcpy</code></p>
-<p>图5显示了使用<code>cudaMemcpy</code>传输不同大小的内存的平均传输时间，硬件设置如下:  3.20 GHz Core 2 Extreme processor, GTX 280 GPU, and PCIe version 2.0。测试了4种不同的配置: Non-Pinned to Device, Non-Pinned from Device, Pinned to Device 和 Pinned from Device。</p>
-<p><img src="http://oi8824myj.bkt.clouddn.com/transfer_time.png" alt="four measures"><br>可以看到，对于传输小规模的内存，基本都是10微妙级别的常量时间。从8K大小开始，传输速度呈现线性增长。</p>
-<p>图6显示了传输相同大小的字节的平均吞吐率，对于小块数据，差异不大，对于大块数据，Pinned memory提供了2.4倍于Non-Pinned memory的吞吐率。<br><img src="http://oi8824myj.bkt.clouddn.com/transfer_throughput.png" alt="吞吐率"></p>
-<h1 id="选择-Pinned-或者-Non-Pinned-Memory"><a href="#选择-Pinned-或者-Non-Pinned-Memory" class="headerlink" title="选择 Pinned 或者 Non-Pinned Memory"></a>选择 Pinned 或者 Non-Pinned Memory</h1><p>当需要分配CPU内存且会传输到GPU时，有两种方式可以选择：<code>pinned</code> 和 <code>non-pinned</code>。</p>
-<p>Pinned memory使用<code>cudaMallocHost</code>来分配CPU内存,可以防止内存页被交换出去，因此可以提供更高的传输速度。Non-pinned memory使用<code>malloc</code>函数分配CPU内存。但是Pinned memory 比Non-pinned memory有更昂贵的内存分配和释放，因为<code>cudaMallocHost</code>分配和释放CPU内存相比<code>malloc</code>更加耗时。</p>
-<p>因此，一个很明显的问题是：<code>当分配多少内存时，选择pinned-memory方式的性能更加优越？</code></p>
-<p>主要有以下两类情况，在这两类情况下，我们都假设内存的分配和释放都执行了1次。<br>（1）假设分配的内存被用来从CPU传到GPU，然后从GPU传回CPU，两次传输的size相同<br>（2）假设分配的内存全部从CPU传到GPU，然后从GPU只是传递了运算结果回CPU，这种情况下GPU核通常执行的是reduction操作，比如常见的计算平均数。</p>
-<p>在第一种情况下，我们可以看到图7的对比结果，结果显示，只有当内存的大小超过16MB时，使用Pinned memory才有更优越的性能。<br><img src="http://oi8824myj.bkt.clouddn.com/pinned_two-way.png" alt="two way"></p>
-<p>在第二中情况下，我们可以看到图8的对比结果，结果显示，Pinned 方式没有优越性，应该选择 Non-Pinned方式。</p>
-<p><img src="http://oi8824myj.bkt.clouddn.com/pinned_one-way.png" alt="one way"></p>
-<p>我们接着比较实用Pinned Memory来分配内存的情况下，（1）和（2）两种情况的性能提升对比，如图9所示：<br><img src="http://oi8824myj.bkt.clouddn.com/pinned_speedup.png" alt="pinned memmory two way"><br>我们可以看到，对于第1种情况，当传输的内存大于10M时才有意义，对于第2种情况，传输的数据大于128M时才有意义。</p>
-<h1 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h1><ul>
-<li>使用<code>Pinned Memory</code>方式的CPU和GPU之间传输速度更大，但是分配和释放的耗时更大</li>
-<li>使用<code>Non-Pinned Memory</code>的方式CPU和GPU之间传输耗时更大，但是分配和释放更快</li>
-<li>具体使用哪种方式，要结合数据的大小以及CPU和GPU之间传输的类型，当传输的数据比较大，且均需从CPU传至GPU和从GPU传至CPU时，使用<code>Pinned Memory</code>有比较大的性能，具体可以看图9的对比。</li>
-</ul>
-
+        
       
     </div>
 
@@ -496,19 +433,13 @@ Memory Transfer Overhead
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/cuda/" rel="tag"># cuda</a>
-          
-        </div>
-      
 
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/09/15/ResNet解读/" rel="next" title="ResNet解读">
-                <i class="fa fa-chevron-left"></i> ResNet解读
+              <a href="/2016/11/26/Jetson-TX1-训练darknet/" rel="next" title="Jetson TX1 训练darknet">
+                <i class="fa fa-chevron-left"></i> Jetson TX1 训练darknet
               </a>
             
           </div>
@@ -516,10 +447,6 @@ Memory Transfer Overhead
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/10/03/Protocol-Buffers-详解1/" rel="prev" title="Protocol Buffers 详解1">
-                Protocol Buffers 详解1 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -546,7 +473,7 @@ Memory Transfer Overhead
   <div class="comments" id="comments">
     
       <div class="fb-comments"
-           data-href="http://yoursite.com/2016/09/15/Pinned-Memory-Vs-Non-Pinned-Memory/"
+           data-href="http://yoursite.com/2016/11/27/Caffe-Layer-学习/"
            data-numposts="10"
            data-width="100%"
            data-colorscheme="light">
@@ -573,17 +500,8 @@ Memory Transfer Overhead
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <section class="site-overview sidebar-panel">
+      <section class="site-overview sidebar-panel sidebar-panel-active">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.png"
@@ -636,22 +554,6 @@ Memory Transfer Overhead
 
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#内存管理"><span class="nav-number">1.</span> <span class="nav-text">内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CPU分配"><span class="nav-number">1.1.</span> <span class="nav-text">CPU分配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GPU分配"><span class="nav-number">1.2.</span> <span class="nav-text">GPU分配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存释放"><span class="nav-number">1.3.</span> <span class="nav-text">内存释放</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CPU和GPU之间的内存传输"><span class="nav-number">2.</span> <span class="nav-text">CPU和GPU之间的内存传输</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#选择-Pinned-或者-Non-Pinned-Memory"><span class="nav-number">3.</span> <span class="nav-text">选择 Pinned 或者 Non-Pinned Memory</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#结论"><span class="nav-number">4.</span> <span class="nav-text">结论</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
     </div>
